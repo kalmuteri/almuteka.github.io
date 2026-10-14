@@ -24,7 +24,7 @@ kalmuteri.github.io/
 └── robots.txt                         Search engine directives
 ```
 
-The **From Purpose to Progress** guide is preserved as a standalone, interactive HTML document. A return link was added to its left navigation. The guide's original chapter navigation, tabs, exercises, diagrams, and print feature remain intact.
+The **From Purpose to Progress** guide is an interactive HTML page with shared theme and navigation assets. Its header includes a return link to Writing. Chapter navigation supports browser history, and its tabs support arrow keys, Home, and End. Exercises, diagrams, and the print feature remain available.
 
 ## Publish at `https://kalmuteri.github.io/`
 
@@ -72,3 +72,11 @@ The current drafts for the two additional technical essays are original starter 
 - The strategy guide's content is sourced from the HTML file supplied for this project.
 - The additional essays and website copy are drafts intended for owner review.
 - Do not publish proprietary employer information, nonpublic datasets, or code without permission.
+## UX and shared assets
+
+- `assets/theme-init.js` applies the saved theme before the page is painted.
+- `assets/ux.js` manages theme preferences and accessible mobile menus across all pages.
+- `assets/ux.css` contains shared accessibility and responsive refinements.
+- `assets/social-preview.png` is the 1200 × 630 sharing image; update its absolute URL in page metadata if the domain changes.
+
+When updating navigation, verify the closed mobile menu is absent from the tab order, focus stays inside the open menu, Escape restores focus, and desktop resizing restores navigation. Check light/dark themes across the guide and site, guide browser Back/Forward and keyboard tabs, and wave controls while paused.

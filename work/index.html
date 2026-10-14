@@ -15,11 +15,21 @@
   <link rel="stylesheet" href="../assets/site.css">
   <script defer src="../assets/site.js"></script>
   <title>Work · Khalid Almuteri</title>
+<script src="../assets/theme-init.js"></script>
+<script defer src="../assets/ux.js"></script>
+<link rel="stylesheet" href="../assets/ux.css">
+<noscript><style>@media(max-width:790px){.sidebar{position:relative;transform:none;visibility:visible;width:100%}.menu-button,.mobile-menu{display:none}}.chapter,.tab-panel{display:block!important}</style></noscript>
+<meta property="og:image" content="https://kalmuteri.github.io/assets/social-preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Khalid Almuteri — Geophysics, computation, and ideas in motion">
+<meta name="twitter:card" content="summary_large_image">
 </head>
 <body>
 <a class="skip-link" href="#content">Skip to content</a>
 <div class="menu-scrim" id="menuScrim" aria-hidden="true"></div>
-<aside class="sidebar" id="sidebar">
+<aside class="sidebar" id="sidebar" aria-label="Site navigation">
+<button class="menu-close" type="button" aria-label="Close navigation">Close <span aria-hidden="true">×</span></button>
   <a class="site-brand" href="../index.html" aria-label="Khalid Almuteri — home">
     <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
     <span><strong>Khalid Almuteri</strong><small>Ideas · Science · Technology</small></span>
@@ -39,14 +49,19 @@
     <div class="topbar-left"><button class="menu-button" id="menuButton" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false"><span>☰</span></button><span class="top-crumb"><a href="../index.html">KA /</a> WORK</span></div>
     <div class="topbar-right"><a class="top-github" href="https://github.com/kalmuteri" target="_blank" rel="noopener noreferrer">GITHUB ↗</a><button type="button" class="theme-button" id="themeButton" aria-label="Switch color theme" title="Switch color theme"><span aria-hidden="true">◐</span> <span class="theme-text">Theme</span></button></div>
   </header>
-  <main id="content" class="content-wrap"><section class="page-intro"><div class="eyebrow"><span class="eyebrow-line"></span> SELECTED TECHNICAL DIRECTIONS</div><h1>Turning equations<br>into <em>insight.</em></h1><p class="lead">Research interests and engineering themes that connect wave physics, inverse problems, software, and intelligent computation.</p></section>
+  <main id="content" class="content-wrap"><section class="page-intro"><div class="eyebrow"><span class="eyebrow-line"></span> SELECTED TECHNICAL DIRECTIONS</div><h1>Turning equations<br>into <em>insight.</em></h1><p class="lead">Explore a hands-on wave simulation and an interactive field guide, then browse the research interests behind them.</p></section>
+<section class="example-grid" aria-label="Explore examples">
+<article class="example-card"><p class="eyebrow">INTERACTIVE DEMO · WAVE PHYSICS</p><h2>See a wave equation in action.</h2><p>Explore how a pulse travels through a homogeneous medium using a two-dimensional finite-difference simulation. Add sources, pause the wavefield, and connect the visualization to the numerical method.</p><a class="text-arrow" href="#simulation">Try the wave simulation ↓</a><a class="text-arrow" href="../writing/from-waves-to-computation/">Read the companion explanation →</a></article>
+<article class="example-card"><p class="eyebrow">FIELD GUIDE · STRATEGY</p><h2>Turn purpose into decisions.</h2><p>Nine chapters connect mission, vision, goals, and strategy through a fictional engineering case study, comparison tables, and a practical self-assessment.</p><a class="text-arrow" href="../writing/strategy-field-guide/">Explore the interactive guide →</a></article>
+</section>
+<h2 class="work-topics-heading">Technical interests.</h2>
 <section class="work-grid" aria-label="Technical interests">
 <div class="work-card"><div class="work-num">01 <span>PHYSICAL MODELING</span></div><div class="work-glyph">∂</div><h2>Wave-equation modeling</h2><p>Numerical simulation of acoustic waves, including finite differences, moving sources, complex boundaries, and curvilinear coordinates.</p><div class="pills"><span>Acoustic PDEs</span><span>Finite differences</span><span>Curvilinear grids</span></div></div>
 <div class="work-card"><div class="work-num">02 <span>INVERSE PROBLEMS</span></div><div class="work-glyph">∇</div><h2>Seismic imaging &amp; inversion</h2><p>Connecting recorded wavefields to subsurface structure using migration, adjoint methods, and full-waveform inversion.</p><div class="pills"><span>RTM</span><span>FWI</span><span>Adjoint state</span></div></div>
 <div class="work-card"><div class="work-num">03 <span>APPLIED INTELLIGENCE</span></div><div class="work-glyph">≋</div><h2>AI for geophysics</h2><p>Exploring how data-driven models can complement physical models in seismic processing, imaging, and workflow automation.</p><div class="pills"><span>PyTorch</span><span>Deep learning</span><span>Physics-informed AI</span></div></div>
 <div class="work-card"><div class="work-num">04 <span>ENGINEERING SYSTEMS</span></div><div class="work-glyph">⌘</div><h2>Scientific software &amp; HPC</h2><p>Building reliable, reusable numerical tools and efficient computational workflows, from prototypes to scalable processing.</p><div class="pills"><span>C++ / Python</span><span>HPC</span><span>Visualization</span></div></div>
 </section>
-<section class="simulation-section"><div class="section-head"><div><p class="eyebrow small-eyebrow">A SMALL EXPERIMENT</p><h2>A wave equation, in motion.</h2></div><p>An illustrative numerical wavefield that you can interact with right in your browser.</p></div><div class="sim-panel"><div class="sim-heading"><div><strong>2-D ACOUSTIC WAVEFIELD</strong><small>Homogeneous medium · Central-difference stencil · Absorbing edge taper</small></div><span class="sim-status" id="simStatus">● RUNNING</span></div><canvas id="waveCanvas" width="180" height="116" aria-label="Animated finite-difference wave propagation. Click the wavefield to add a new source pulse.">Your browser does not support the canvas simulation.</canvas><div class="sim-controls"><span>Click anywhere in the wavefield to introduce a new pulse.</span><div><button type="button" id="simToggle" class="mini-control">Pause</button><button type="button" id="simPulse" class="mini-control">Add pulse</button><button type="button" id="simReset" class="mini-control">Reset</button></div></div></div><p class="sim-note">Educational visualization rather than a production modeling code. See the companion <a href="../writing/from-waves-to-computation/">wave-equation primer ↗</a>.</p></section>
+<section class="simulation-section" id="simulation"><div class="section-head"><div><p class="eyebrow small-eyebrow">A SMALL EXPERIMENT</p><h2>A wave equation, in motion.</h2></div><p>An illustrative numerical wavefield that you can interact with right in your browser.</p></div><div class="sim-panel"><div class="sim-heading"><div><strong>2-D ACOUSTIC WAVEFIELD</strong><small>Homogeneous medium · Central-difference stencil · Absorbing edge taper</small></div><span class="sim-status" id="simStatus">● RUNNING</span></div><canvas id="waveCanvas" width="180" height="116" aria-label="Animated finite-difference wave propagation. Click the wavefield to add a new source pulse.">Your browser does not support the canvas simulation.</canvas><div class="sim-controls"><span>Click the wavefield to place a pulse, or use Add pulse to place one in the center.</span><div><button type="button" id="simToggle" class="mini-control">Pause</button><button type="button" id="simPulse" class="mini-control">Add pulse</button><button type="button" id="simReset" class="mini-control">Reset</button></div></div></div><p class="sim-note">Educational visualization rather than a production modeling code. See the companion <a href="../writing/from-waves-to-computation/">wave-equation primer ↗</a>.</p></section>
 <section class="bottom-cta"><div><p class="eyebrow small-eyebrow">READ FURTHER</p><h2>Good engineering begins<br>with good questions.</h2></div><a class="button-primary" href="../writing/">Explore technical essays ↗</a></section></main>
   <footer class="site-footer"><span>Curiosity. Rigor. Progress.</span><span><a href="../index.html">Home</a><a href="../writing/">Writing</a><a href="https://github.com/kalmuteri" target="_blank" rel="noopener noreferrer">GitHub ↗</a></span></footer>
 </div>

@@ -1,37 +1,6 @@
 (() => {
   'use strict';
-  const body = document.body;
-  const themeButton = document.getElementById('themeButton');
-  const menuButton = document.getElementById('menuButton');
-  const scrim = document.getElementById('menuScrim');
   const $ = id => document.getElementById(id);
-
-  let savedTheme = '';
-  try { savedTheme = localStorage.getItem('km-theme') || ''; } catch (_) {}
-  const media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
-  const dark = savedTheme ? savedTheme === 'dark' : !!(media && media.matches);
-  body.classList.toggle('dark', dark);
-  const setThemeLabel = () => {
-    if (themeButton) themeButton.setAttribute('aria-label', body.classList.contains('dark') ? 'Switch to light mode' : 'Switch to dark mode');
-  };
-  setThemeLabel();
-  themeButton?.addEventListener('click', () => {
-    const nextDark = !body.classList.contains('dark');
-    body.classList.toggle('dark', nextDark);
-    try { localStorage.setItem('km-theme', nextDark ? 'dark' : 'light'); } catch (_) {}
-    setThemeLabel();
-  });
-
-  function closeMenu() {
-    body.classList.remove('menu-open');
-    menuButton?.setAttribute('aria-expanded', 'false');
-  }
-  menuButton?.addEventListener('click', () => {
-    const nowOpen = body.classList.toggle('menu-open');
-    menuButton.setAttribute('aria-expanded', String(nowOpen));
-  });
-  scrim?.addEventListener('click', closeMenu);
-  window.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
   document.querySelectorAll('[data-year]').forEach(el => { el.textContent = String(new Date().getFullYear()); });
 
   // A lightweight 2-D scalar-wave finite-difference demonstration.
@@ -44,7 +13,7 @@
   let prev = new Float32Array(N);
   let curr = new Float32Array(N);
   let next = new Float32Array(N);
-  let playing = !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  let playing = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let frame = 0;
   const widthStepSq = 0.18; // v² * dt² / dx²; 2-D stability criterion: <= 0.5
   const imageData = ctx.createImageData(nx, nz);
@@ -105,11 +74,11 @@
     if(status){ status.textContent = playing ? '● RUNNING' : '◼ PAUSED';status.classList.toggle('paused', !playing); }
   }
   toggle?.addEventListener('click',()=>{playing=!playing;setStatus();});
-  $('simPulse')?.addEventListener('click',()=>pulse(nx*.49,nz*.5));
+  $('simPulse')?.addEventListener('click',()=>{pulse(nx*.49,nz*.5);draw();});
   $('simReset')?.addEventListener('click',reset);
   canvas.addEventListener('click', e=>{
     const box = canvas.getBoundingClientRect();
-    pulse((e.clientX-box.left)*nx/box.width,(e.clientY-box.top)*nz/box.height);
+    pulse((e.clientX-box.left)*nx/box.width,(e.clientY-box.top)*nz/box.height);draw();
   });
   reset();setStatus();
   let raf = 0;
@@ -118,5 +87,6 @@
     raf=window.requestAnimationFrame(animate);
   }
   raf=window.requestAnimationFrame(animate);
-  window.addEventListener('pagehide',()=>window.cancelAnimationFrame(raf),{once:true});
+  window.addEventListener('pagehide',()=>window.cancelAnimationFrame(raf));
+  window.addEventListener('pageshow',e=>{if(e.persisted)raf=window.requestAnimationFrame(animate);});
 })();

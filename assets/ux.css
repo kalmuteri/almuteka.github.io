@@ -1,0 +1,35 @@
+/* Shared interaction styles for the site and field guide. */
+:root { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+.menu-close { display:none; }
+.skip-link {position:fixed;top:-100px;left:16px;z-index:100;background:#fff;color:#123c40;padding:12px 16px;border-radius:8px;}
+.skip-link:focus {top:12px;}
+:root[data-theme="dark"] .button-primary {color:#102738;}
+:root[data-theme="dark"] .button-primary:hover {color:#102738;}
+button,.theme-button,.menu-button,.iconbtn,.mini-control {min-height:44px;}
+:root[data-theme="dark"] .lead {color:var(--ink-soft);}
+:root[data-theme="dark"] .tab.active {background:var(--teal);color:#102738;}
+:root[data-theme="dark"] .nav-control.next strong {color:#fff;}
+:root[data-theme="dark"] .flow-box strong,:root[data-theme="dark"] .result-meta span {color:#8ce2cf;}
+:root[data-theme="dark"] .flow-box span,:root[data-theme="dark"] .notes {color:var(--ink-soft);}
+.guide-back {display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:7px 12px;white-space:nowrap;text-decoration:none;border:1px solid var(--line);border-radius:9px;font-size:.8rem;font-weight:700;}
+.topbar>div:first-child {min-width:0;}
+.top-actions {flex-shrink:0;}
+.toplabel {overflow-wrap:anywhere;}
+.example-grid {display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:0 0 42px;}
+.example-card {background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:28px;display:flex;flex-direction:column;gap:14px;}
+.example-card p {font-size:.95rem;}
+.example-card .text-arrow {margin-top:auto;padding-top:8px;}
+.work-topics-heading {margin:0 0 22px;}
+#simulation {scroll-margin-top:24px;}
+@media(max-width:790px) {
+  .sidebar {visibility:hidden;}
+  body.menu-open {overflow:hidden;}
+  body.menu-open .sidebar {visibility:visible;}
+  .menu-close {display:flex;align-items:center;justify-content:space-between;width:100%;background:#1d4854;color:white;border:1px solid #47717a;border-radius:9px;padding:9px 13px;margin:0 0 16px;cursor:pointer;}
+  .topbar {flex-wrap:wrap;padding:12px 0;gap:10px;}
+  .topbar>div:first-child {flex:1 1 100%;}
+  .topbar .top-actions {width:100%;justify-content:flex-end;}
+}
+@media(max-width:650px) {.example-grid {grid-template-columns:1fr;}}
+@media print {.menu-close,.guide-back,.skip-link {display:none!important;}}
