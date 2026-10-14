@@ -80,3 +80,26 @@ test('two-layer model produces reflected and transmitted energy',()=>{
  for(let n=0;n<500;n++){a.step();b.step();if(n>280)reflected=Math.max(reflected,Math.abs(b.curr[45*101+50]-a.curr[45*101+50]));transmitted=Math.max(transmitted,Math.abs(b.curr[90*101+50]));}
  assert.ok(reflected>.005,`reflection ${reflected}`);assert.ok(transmitted>.01,`transmission ${transmitted}`);
 });
+import {inspect} from '../assets/lab/inspector.js';
+import {diagnostics,rickerBandwidth,phaseRatio} from '../assets/lab/diagnostics.js';
+import {experiments,experimentSetup} from '../assets/lab/experiments.js';
+test('inspector exactly predicts Float32 engine updates including damping and multiple forces',()=>{
+ const s=new Solver({nx:40,nz:40,model:'layers',interfaceDepth:150,lowerVelocity:2500});s.pulse(10,10);
+ s.addSource({x:4,z:4,frequency:20,start:0,amplitude:.1});s.addSource({x:4,z:4,frequency:12,start:0,amplitude:.03});
+ for(let n=0;n<50;n++)s.step();
+ const a=inspect(s,4,4),b=inspect(s,20,20);assert.ok(a.q>0);assert.notEqual(a.undamped,a.damped);s.step();assert.equal(s.curr[a.k],a.predicted);assert.equal(s.curr[b.k],b.predicted);
+});
+test('Ricker bandwidth is 1% of spectral peak; stencil dispersion tends to continuum limit',()=>{
+ const x=rickerBandwidth(12)/12;near(x*x*Math.exp(1-x*x),.01,1e-12);assert.ok(x>2.7&&x<2.8);
+ near(phaseRatio(1500,.01,10,10,.002),1,1e-7);assert.equal(phaseRatio(1500,100,10,10,.002),null);
+ const s=new Solver();assert.ok(diagnostics(s,{sourceType:'ricker',frequency:40}).ppw<10);
+});
+test('every guided setup constructs a stable reproducible solver',()=>{
+ for(const e of experiments){const c=experimentSetup(e.id),a=new Solver(c),b=new Solver(c);assert.ok(a.cfl<=1);assert.equal(a.config.dt,b.config.dt);assert.deepEqual(a.velocity,b.velocity);}
+});
+test('sponge reduces late returning energy relative to reflecting boundaries',()=>{
+ const options={nx:81,nz:81,dt:.002,spongeWidth:16,spongeStrength:100};
+ const a=new Solver({...options,boundary:'reflecting'}),b=new Solver({...options,boundary:'sponge'});a.pulse(40,40);b.pulse(40,40);
+ for(let n=0;n<450;n++){a.step();b.step();}
+ const energy=s=>s.curr.reduce((sum,p)=>sum+p*p,0);assert.ok(energy(b)<energy(a)*.3,`${energy(b)} / ${energy(a)}`);
+});

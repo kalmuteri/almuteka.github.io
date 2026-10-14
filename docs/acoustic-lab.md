@@ -42,3 +42,22 @@ Ricker forcing is `A (1-2q²) exp(-q²)` with `q=pi f0(t-tPeak)`, `tPeak=tStart+
 Receivers sample the current field at t=0, then once after each numerical update. Drawing never samples. Configuring a receiver array or individual receiver restarts the run to maintain common sampling. Recordings are preallocated, capped at 5001 samples and 24 UI receivers (the reusable component accepts up to 32). The simulation pauses at the recording cap. CSV includes receiver ID, physical coordinates, dt and time for each amplitude. A shot gather uses receiver index horizontally and time downward; single-channel traces use time horizontally. Recording gain is adaptive and is explicitly labeled.
 
 Tests added: model-cell assignment, true maximum-velocity CFL, normalized Ricker injection, source activation/reset, receiver counts/CSV, analytic standing-mode propagation at two velocities (absolute amplitude error <0.002), and measurable reflection/transmission at a two-layer interface. All 15 tests passed at this checkpoint. Browser check: changing to a layered Ricker source, adding 12 receivers, then Step yields exactly 0.002 s and two samples per channel, with no console errors.
+
+## Phase 3 — guided learning and numerical inspection
+
+Explore keeps numerical controls out of the initial view. Understand exposes the
+five-point stencil and bandwidth diagnostics. Experiment also exposes spacing,
+time step and boundary parameters. Eight presets reset all numerical/source
+settings deterministically; each includes prediction, observation, explanation
+and a further challenge. Playback is paused when loading a preset.
+
+The inspector reproduces the actual damped update and Float32 source accumulation,
+then compares its prediction with a real engine step. The Ricker bandwidth cutoff
+is the upper frequency at 1% of peak spectral amplitude, not the dominant frequency.
+Gaussian bandwidth is a conservative spatial-spectrum equivalent. Dispersion
+estimates use the discrete stencil relation at three directions and minimum velocity;
+they are sampling guidance, not a full heterogeneous error bound.
+
+Validation: 19 automated numerical/regression tests pass. All eight presets load
+and step in the browser; the inspector reports an exact Float32 match. No browser
+console errors were observed.

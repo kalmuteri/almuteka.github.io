@@ -15,6 +15,7 @@ export class Solver {
     this.n=c.nx*c.nz;this.velocity=makeModel(c);
     this.vmin=Infinity;this.vmax=0;for(const v of this.velocity){this.vmin=Math.min(this.vmin,v);this.vmax=Math.max(this.vmax,v);}
     this.sources=[];this.force=new Float32Array(this.n);
+    if(c.autoDt)c.dt=.6/(this.vmax*Math.hypot(1/c.dx,1/c.dz));
     this.validateStability();
     this.prev=new Float32Array(this.n);this.curr=new Float32Array(this.n);this.next=new Float32Array(this.n);
     this.sigma=damping(c.nx,c.nz,c.spongeWidth,c.spongeStrength,c.boundary);
