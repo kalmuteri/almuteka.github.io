@@ -42,3 +42,41 @@ test('playback integrates physical time independently of refresh rate',()=>{
  for(let i=0;i<60;i++)n+=a.advance(1/60,.5,.002);for(let i=0;i<120;i++)m+=b.advance(1/120,.5,.002);
  assert.equal(n,250);assert.equal(m,250);assert.ok(a.advance(60,1,.002)<=32);
 });
+import {makeModel} from '../assets/lab/models.js';
+import {ricker} from '../assets/lab/sources.js';
+import {Receivers,receiverArray} from '../assets/lab/receivers.js';
+test('layered and anomaly velocities are assigned at the correct cells',()=>{
+ const c={nx:100,nz:80,dx:10,dz:10,velocity:1500,lowerVelocity:2500,interfaceDepth:400};
+ const layered=makeModel({...c,model:'layers'});assert.equal(layered[39*100+20],1500);assert.equal(layered[40*100+20],2500);
+ assert.equal(makeModel({...c,model:'slow'})[44*100+60],975);assert.equal(makeModel({...c,model:'fast'})[44*100+60],2250);
+ const s=new Solver({...c,model:'fast'});near(s.cfl,cfl(2250,.002,10,10));
+});
+test('Ricker source follows normalized PDE injection exactly',()=>{
+ near(ricker(.125,12,.125),1);const s=new Solver({nx:30,nz:30,boundary:'reflecting'});
+ const source=s.addSource({x:15,z:15,frequency:12,amplitude:.01,start:0});s.steps=50;
+ const expected=1500**2*.002**2*ricker(.1,12,source.peakTime,.01);s.step();near(s.curr[15*30+15],expected,1e-8);near(s.curr[15*30+16],0);
+});
+test('source activation is not advanced by render calls; reset removes events',()=>{
+ const s=new Solver();s.addSource({x:50,z:30,start:.2,frequency:10});for(let i=0;i<50;i++)s.step();near(s.measure(),0);s.reset();assert.equal(s.sources.length,0);
+});
+test('receiver sampling is once per numerical step, including initial time; CSV matches',()=>{
+ const s=new Solver({nx:30,nz:30});const r=new Receivers([{x:15,z:15}],s.config,5);s.pulse(15,15);r.sample(s.curr);
+ for(let i=0;i<4;i++){s.step();r.sample(s.curr);}assert.equal(r.count,5);assert.equal(r.sample(s.curr),false);near(r.traces[0][4],s.curr[465]);
+ assert.ok(r.csv().includes('0.008,1,150,150,0.002,'));assert.equal(r.csv().split('\n').length,6);
+ assert.throws(()=>receiverArray(s.config,20,20,5),/does not fit/);
+});
+test('discrete standing mode follows analytic propagation speed (under 1% error)',()=>{
+ for(const velocity of [1000,2000]){
+ const s=new Solver({nx:81,nz:81,dx:10,dz:10,dt:.001,velocity,boundary:'reflecting'}),c=s.config;
+ const omega=velocity*Math.PI*Math.SQRT2/800;
+ for(let z=1;z<80;z++)for(let x=1;x<80;x++){const k=z*81+x,p=Math.sin(Math.PI*x/80)*Math.sin(Math.PI*z/80);s.curr[k]=p;s.prev[k]=p*Math.cos(omega*c.dt);}
+ for(let n=0;n<100;n++)s.step();near(s.curr[40*81+40],Math.cos(omega*.1),.002);
+ }
+});
+test('two-layer model produces reflected and transmitted energy',()=>{
+ const base={nx:101,nz:141,dx:10,dz:10,dt:.001,boundary:'sponge',spongeWidth:10,interfaceDepth:700};
+ const a=new Solver({...base,model:'homogeneous'}),b=new Solver({...base,model:'layers',lowerVelocity:2500});a.pulse(50,45,1,4);b.pulse(50,45,1,4);
+ let reflected=0,transmitted=0;
+ for(let n=0;n<500;n++){a.step();b.step();if(n>280)reflected=Math.max(reflected,Math.abs(b.curr[45*101+50]-a.curr[45*101+50]));transmitted=Math.max(transmitted,Math.abs(b.curr[90*101+50]));}
+ assert.ok(reflected>.005,`reflection ${reflected}`);assert.ok(transmitted>.01,`transmission ${transmitted}`);
+});

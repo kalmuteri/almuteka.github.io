@@ -32,3 +32,13 @@ References: [Devito acoustic modeling tutorial](https://www.devitoproject.org/ex
 2. Velocity models, time-dependent sources, receivers and recordings.
 3. Stencil inspector, sampling diagnostics, boundary comparisons and eight guided experiments.
 4. Accessibility, performance measurements, regression and deployment verification.
+
+## Phase 2 — physical models and recordings
+
+Five model generators implement homogeneous, horizontal two-layer, inclined-interface, and elliptical slow/fast anomaly cases. Anomalies use 0.65× and 1.5× background velocity. Interfaces change the local v² coefficient in the stated constant-density equation; they do not introduce density contrasts. Every model change constructs a fresh, validated solver and resets recording time.
+
+Ricker forcing is `A (1-2q²) exp(-q²)` with `q=pi f0(t-tPeak)`, `tPeak=tStart+1.5/f0`. It begins at tStart (a negligible tail is truncated). A is source density in a.u./m² at a single grid cell, and injection is v²dt²s inside the update. This is a cell force, not a grid-independent continuum delta source; absolute amplitudes must not be compared across grid sizes as if the integrated source strength were fixed. Add Source schedules exactly one event. Gaussian amplitude and Ricker source density have different units, shown beside the input. Source locations snap to interior nodes.
+
+Receivers sample the current field at t=0, then once after each numerical update. Drawing never samples. Configuring a receiver array or individual receiver restarts the run to maintain common sampling. Recordings are preallocated, capped at 5001 samples and 24 UI receivers (the reusable component accepts up to 32). The simulation pauses at the recording cap. CSV includes receiver ID, physical coordinates, dt and time for each amplitude. A shot gather uses receiver index horizontally and time downward; single-channel traces use time horizontally. Recording gain is adaptive and is explicitly labeled.
+
+Tests added: model-cell assignment, true maximum-velocity CFL, normalized Ricker injection, source activation/reset, receiver counts/CSV, analytic standing-mode propagation at two velocities (absolute amplitude error <0.002), and measurable reflection/transmission at a two-layer interface. All 15 tests passed at this checkpoint. Browser check: changing to a layered Ricker source, adding 12 receivers, then Step yields exactly 0.002 s and two samples per channel, with no console errors.

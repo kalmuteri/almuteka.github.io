@@ -18,6 +18,7 @@
 <script src="../assets/theme-init.js"></script>
 <script defer src="../assets/ux.js"></script>
 <link rel="stylesheet" href="../assets/ux.css">
+
 <noscript><style>@media(max-width:790px){.sidebar{position:relative;transform:none;visibility:visible;width:100%}.menu-button,.mobile-menu{display:none}}.chapter,.tab-panel{display:block!important}</style></noscript>
 <meta property="og:image" content="https://kalmuteri.github.io/assets/social-preview.png">
 <meta property="og:image:width" content="1200">
@@ -55,12 +56,31 @@
   <main id="content" class="content-wrap"><section class="page-intro"><div class="eyebrow"><span class="eyebrow-line"></span> LAB · INTERACTIVE EXPERIMENTS</div><h1>Turning equations<br>into <em>insight.</em></h1><p class="lead">A space for hands-on scientific experiments. Change a wavefield, explore the behavior, and connect what you see to the underlying method.</p></section>
 <nav class="page-jumps" aria-label="On this page"><a href="#simulation">Try the wave demo ↓</a><a href="../about/#research">About my research →</a></nav>
 <section class="simulation-section" id="simulation" aria-labelledby="lab-title"><div class="section-head"><div><p class="eyebrow small-eyebrow">ACOUSTIC WAVE LAB</p><h2 id="lab-title">Predict. Run. Observe.</h2></div><p>Start with a disturbance in a uniform, 1500 m/s medium.</p></div>
-<div class="lab-shell"><div class="lab-status"><strong>2-D acoustic wavefield</strong><span id="simStatus">Paused</span><output id="simTime" aria-label="Simulation time">0.000 s</output></div>
+<div class="lab-shell">
+<form id="setupForm" class="lab-setup"><fieldset><legend>Physical setup</legend><div class="lab-options">
+<label>Velocity model<select id="model"><option value="homogeneous">Homogeneous</option><option value="layers">Two layers</option><option value="slow">Low-velocity anomaly</option><option value="fast">High-velocity anomaly</option><option value="inclined">Inclined interface</option></select></label>
+<label>Background velocity (m/s)<input id="velocity" type="number" min="500" max="4000" step="100" value="1500" required></label>
+<label>Lower layer (m/s)<input id="lowerVelocity" type="number" min="500" max="5000" step="100" value="2500" required></label>
+<label>Interface depth (m)<input id="interfaceDepth" type="number" min="100" max="1050" step="10" value="580" required></label></div></fieldset>
+<fieldset><legend>Source</legend><div class="lab-options"><label>Mechanism<select id="sourceType"><option value="gaussian">Gaussian displacement</option><option value="ricker">Ricker forcing</option></select></label>
+<label>Amplitude <span id="sourceUnits">(a.u.)</span><input id="sourceAmplitude" type="number" min="0.000001" max="10" step="any" value="1" required></label>
+<label>Width (m)<input id="sourceWidth" type="number" min="10" max="200" step="1" value="48" required></label>
+<label>Frequency (Hz)<input id="frequency" type="number" min="1" max="80" step="1" value="12" required></label>
+<label>Activation delay (s)<input id="sourceDelay" type="number" min="0" max="2" step="0.01" value="0" required></label>
+<label>Source x (m)<input id="sourceX" type="number" min="10" max="1780" step="10" value="890" required></label>
+<label>Source z (m)<input id="sourceZ" type="number" min="10" max="1140" step="10" value="300" required></label></div>
+<p class="lab-help" id="sourceHelp">Gaussian: an initial displacement with zero initial velocity, not a seismic forcing wavelet.</p><canvas id="sourceCanvas" width="500" height="100" aria-label="Source signature preview"></canvas><p id="sourcePlotLabel" class="lab-help"></p></fieldset>
+<button type="submit">Apply setup &amp; reset</button><p class="lab-help">Applying a setup resets the wavefield and all receiver samples.</p></form>
+<div class="lab-status"><strong>2-D acoustic wavefield</strong><span id="simStatus">Paused</span><output id="simTime" aria-label="Simulation time">0.000 s</output></div>
 <div class="wave-wrap"><div class="axis-z"><span>0 m</span><span>Depth ↓</span><span id="zMax">1150 m</span></div><canvas id="waveCanvas" width="180" height="116" aria-label="Computed wavefield. Click to add a Gaussian pulse; the Add pulse button provides a keyboard alternative.">A canvas-capable browser is required for the wavefield.</canvas><div class="axis-x"><span>0 m</span><span id="xMid">x · 895 m</span><span id="xMax">1790 m</span></div></div>
 <div class="colorbar"><div class="colorbar-gradient"></div><div class="colorbar-labels"><span id="scaleLow">−1</span><span>0 · amplitude (a.u.)</span><span id="scaleHigh">1</span></div></div>
-<div class="lab-toolbar"><button id="simToggle" type="button">Play</button><button id="simStep" type="button">Step</button><button id="simPulse" type="button">Add pulse</button><button id="simReset" type="button">Reset</button><label>Playback<select id="playback"><option value="0.25">0.25×</option><option value="0.5" selected>0.5×</option><option value="1">1×</option></select></label></div>
-<div class="lab-options"><label>Amplitude scale<select id="scaleMode"><option value="fixed">Fixed</option><option value="adaptive">Adaptive</option></select></label><label>Fixed limit (a.u.)<input id="fixedLimit" type="number" min="0.001" max="100" step="0.1" value="1"></label><label class="check"><input type="checkbox" id="showGrid"> Show grid</label></div>
-<p class="lab-help" id="scaleNote"></p><p class="lab-help">x and z spacing: 10 m · time step: 2 ms. Playback changes the rate of numerical steps, never their size. Depth increases downward.</p><p class="lab-message" id="labMessage" role="status"></p>
+<div class="lab-toolbar"><button id="simToggle" type="button">Play</button><button id="simStep" type="button">Step</button><button id="simPulse" type="button">Add source</button><button id="simReset" type="button">Reset</button><label>Playback<select id="playback"><option value="0.25">0.25×</option><option value="0.5" selected>0.5×</option><option value="1">1×</option></select></label></div>
+<div class="lab-options"><label>View<select id="view"><option value="wave">Wavefield</option><option value="velocity">Velocity</option><option value="overlay">Wavefield + velocity</option></select></label><label>Click / tap action<select id="clickAction"><option value="source">Add source</option><option value="receiver">Add receiver (resets run)</option><option value="inspect">Inspect cell</option></select></label><label>Amplitude scale<select id="scaleMode"><option value="fixed">Fixed</option><option value="adaptive">Adaptive</option></select></label><label>Fixed limit (a.u.)<input id="fixedLimit" type="number" min="0.001" max="100" step="0.1" value="1"></label><label class="check"><input type="checkbox" id="showGrid"> Show grid</label></div>
+<p class="lab-help" id="velocityLegend">Velocity palette: blue (slow) → ochre (fast).</p><p class="lab-help" id="pointInfo"></p><p class="lab-help" id="scaleNote"></p><p class="lab-help" id="samplingInfo"></p><p class="lab-message" id="labMessage" role="status"></p>
+<section class="receiver-panel" aria-labelledby="receiverTitle"><h3 id="receiverTitle">Receiver recordings</h3><p class="lab-help">Pink squares mark receivers. Adding or removing receivers restarts the run so every channel shares the same time axis.</p>
+<div class="lab-options"><label>Receiver count<input id="receiverCount" type="number" min="1" max="24" value="12" step="1"></label><label>Spacing (m)<input id="receiverSpacing" type="number" min="10" max="1000" value="100" step="10"></label><label>Depth (m)<input id="receiverDepth" type="number" min="10" max="1140" value="200" step="10"></label></div>
+<div class="lab-toolbar"><button id="addArray" type="button">Set receiver array</button><button id="clearReceivers" type="button">Remove all receivers</button><button id="downloadCSV" type="button">Download CSV</button><label>Recording view<select id="traceSelect"><option value="-1">Shot gather</option></select></label></div>
+<canvas id="recordCanvas" width="600" height="240" aria-label="Receiver amplitudes: shot gather or single trace"></canvas><p id="recordLabel" class="lab-help"></p></section>
 <noscript><p>Enable JavaScript to run the numerical simulation. The <a href="../writing/from-waves-to-computation/">wave-equation explainer</a> is available without JavaScript.</p></noscript>
 </div><p class="sim-note">Educational constant-density acoustic model, with an absorbing sponge rather than a PML. <a href="../writing/from-waves-to-computation/">Read the numerical-method explainer →</a></p></section>
 
