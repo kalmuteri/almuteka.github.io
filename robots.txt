@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://kalmuteri.github.io/sitemap.xml
