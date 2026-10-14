@@ -80,3 +80,11 @@ The current drafts for the two additional technical essays are original starter 
 - `assets/social-preview.png` is the 1200 × 630 sharing image; update its absolute URL in page metadata if the domain changes.
 
 When updating navigation, verify the closed mobile menu is absent from the tab order, focus stays inside the open menu, Escape restores focus, and desktop resizing restores navigation. Check light/dark themes across the guide and site, guide browser Back/Forward and keyboard tabs, and wave controls while paused.
+
+## Site sections
+
+- **About** includes background, research interests, and working principles.
+- **Lab** (`/lab/`) contains interactive scientific experiments.
+- **Writing** contains technical articles and explainers.
+- **Guides** (`/guides/`) contains the leadership field guide at `/guides/strategy-field-guide/`.
+- The old `/work/` and `/writing/strategy-field-guide/` URLs redirect while preserving bookmarks. `/work/#research` points to About.

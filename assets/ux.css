@@ -47,3 +47,26 @@ button,.theme-button,.menu-button,.iconbtn,.mini-control {min-height:44px;}
 @media(max-width:570px) {
   .spotlight-head {flex-wrap:wrap;gap:8px;}
 }
+
+/* Give visitors a clear route through the library and project pages. */
+.page-jumps {display:flex;flex-wrap:wrap;gap:10px;margin:0 0 30px;}
+.page-jumps a {display:inline-flex;align-items:center;min-height:44px;padding:9px 15px;border:1px solid var(--line);border-radius:10px;background:var(--paper);font-size:.85rem;font-weight:700;text-decoration:none;}
+.page-jumps a:hover {border-color:var(--teal);background:var(--teal-soft);}
+#articles,#leadership-guide,#research,.essay-body h2 {scroll-margin-top:24px;}
+.project-context {display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:0 0 24px;padding:24px;background:var(--paper);border:1px solid var(--line);border-radius:14px;}
+.project-context p {margin-top:6px;font-size:.92rem;}
+.page-jumps + .simulation-section {padding-top:0;}
+.simulation-section + .work-topics-heading {margin-top:54px;}
+.article-contents {background:var(--paper);border:1px solid var(--line);border-radius:12px;margin:0 0 24px;}
+.article-contents summary {cursor:pointer;padding:14px 20px;font-weight:700;min-height:48px;}
+.article-contents summary:focus-visible {outline:3px solid var(--teal);outline-offset:3px;}
+.article-contents nav {padding:0 20px 16px;}
+.article-contents ol {list-style:none;padding:0;margin:0;}
+.article-contents a {display:block;padding:9px 0;min-height:44px;}
+.related-demo {padding:22px 24px;border-left:4px solid var(--teal);background:var(--teal-soft);border-radius:0 12px 12px 0;margin-bottom:28px;}
+.related-demo p {margin:8px 0;font-size:.92rem;}
+.related-demo a {display:inline-block;padding:8px 0;font-weight:700;}
+@media(max-width:650px) {.project-context {grid-template-columns:1fr;gap:16px;}.page-jumps a {flex:1 1 auto;}}
+@media print {.page-jumps,.article-contents {display:none;}}
+
+#research .work-card h3 {position:relative;font-size:1.7rem;margin:32px 0 12px;}
