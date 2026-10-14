@@ -3,6 +3,7 @@ export function makeModel(c) {
   if(!modelNames[c.model||'homogeneous'])throw Error('Unknown velocity model.');
   const out=new Float32Array(c.nx*c.nz),base=c.velocity,lower=c.lowerVelocity??2500,depth=c.interfaceDepth??((c.nz-1)*c.dz/2);
   if(!Number.isFinite(lower)||lower<=0)throw Error('Layer velocity must be positive.');
+  if(!Number.isFinite(depth))throw Error('Interface depth must be finite.');
   for(let z=0;z<c.nz;z++)for(let x=0;x<c.nx;x++) {
     let v=base;
     if(c.model==='layers'&&z*c.dz>=depth)v=lower;

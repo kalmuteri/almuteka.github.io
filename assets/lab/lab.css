@@ -35,3 +35,7 @@
 .inspector-values {font: .85rem/1.8 ui-monospace,monospace;overflow-wrap:anywhere;}.lab-equation {padding:16px;background:var(--teal-soft);border-radius:8px;font-size:.95rem;}
 .diagnostic {padding:12px 16px;border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:8px;font-size:.85rem;}
 .lab-shell [hidden] {display:none!important;}
+
+.axis-z span {white-space:nowrap;}
+@media(max-width:500px){.wave-wrap{grid-template-columns:42px 1fr;}}
+.lab-shell button:disabled {opacity:.5;cursor:default;}

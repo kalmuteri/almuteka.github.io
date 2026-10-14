@@ -103,3 +103,30 @@ test('sponge reduces late returning energy relative to reflecting boundaries',()
  for(let n=0;n<450;n++){a.step();b.step();}
  const energy=s=>s.curr.reduce((sum,p)=>sum+p*p,0);assert.ok(energy(b)<energy(a)*.3,`${energy(b)} / ${energy(a)}`);
 });
+import {prepareRun} from '../assets/lab/run.js';
+test('invalid replacement run leaves the prior solver and recording untouched',()=>{
+ const c=experimentSetup('recordings'),original=prepareRun(c,[{x:50,z:20}]);original.solver.step();original.record.sample(original.solver.curr);
+ const saved=original.solver.curr.slice();
+ assert.throws(()=>prepareRun({...c,sourceX:99999}),/outside/);
+ assert.throws(()=>prepareRun(c,[{x:NaN,z:20}]),/inside/);
+ assert.throws(()=>prepareRun({...c,boundary:'unknown'}),/boundary/);
+ assert.throws(()=>prepareRun({...c,spongeStrength:-1}),/boundary/);
+ assert.throws(()=>receiverArray(original.solver.config,0,10,20),/Invalid/);
+ assert.equal(original.record.count,2);assert.deepEqual(original.solver.curr,saved);
+});
+test('direct Gaussian peak agrees with travel time; slow and fast anomalies delay and advance it',()=>{
+ const arrival={};
+ for(const model of ['homogeneous','slow','fast']){
+  const s=new Solver({nx:180,nz:180,dt:.001,model});s.pulse(30,99,1,3);let peak=0;
+  for(let n=0;n<1100;n++){s.step();const a=Math.abs(s.curr[99*180+150]);if(a>peak){peak=a;arrival[model]=s.time;}}
+ }
+ // Finite-width pulses are not impulses: allow 30 ms about 1200 m / 1500 m/s.
+ near(arrival.homogeneous,.8,.03);
+ assert.ok(arrival.slow>arrival.homogeneous+.1);assert.ok(arrival.fast<arrival.homogeneous-.05);
+});
+test('all presets run finite and reset reproducibly with their actual source',()=>{
+ for(const e of experiments){const c=experimentSetup(e.id),a=prepareRun(c).solver,b=prepareRun(c).solver;
+  for(let n=0;n<80;n++){a.step();b.step();}
+  assert.deepEqual(a.curr,b.curr);assert.ok(Number.isFinite(a.measure()));
+ }
+});

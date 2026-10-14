@@ -12,8 +12,9 @@ export class Solver {
     const c=this.config;
     for (const key of ['nx','nz']) if (!Number.isInteger(c[key])||c[key]<8||c[key]>400) throw Error('Grid dimensions must be integers from 8 to 400.');
     for (const key of ['dx','dz','dt','velocity']) if (!Number.isFinite(c[key])||c[key]<=0) throw Error('Sampling and velocity must be positive and finite.');
+    if(!['sponge','reflecting'].includes(c.boundary)||!Number.isFinite(c.spongeWidth)||c.spongeWidth<=0||!Number.isFinite(c.spongeStrength)||c.spongeStrength<0)throw Error('Invalid boundary settings.');
     this.n=c.nx*c.nz;this.velocity=makeModel(c);
-    this.vmin=Infinity;this.vmax=0;for(const v of this.velocity){this.vmin=Math.min(this.vmin,v);this.vmax=Math.max(this.vmax,v);}
+    this.vmin=Infinity;this.vmax=0;for(const v of this.velocity){if(!Number.isFinite(v)||v<=0)throw Error('Velocity is outside the supported numeric range.');this.vmin=Math.min(this.vmin,v);this.vmax=Math.max(this.vmax,v);}
     this.sources=[];this.force=new Float32Array(this.n);
     if(c.autoDt)c.dt=.6/(this.vmax*Math.hypot(1/c.dx,1/c.dz));
     this.validateStability();

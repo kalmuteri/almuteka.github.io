@@ -27,11 +27,12 @@ Verification: analytical polynomial Laplacian, unequal spacing, zero/constant-fi
 
 References: [Devito acoustic modeling tutorial](https://www.devitoproject.org/examples/seismic/tutorials/01_modelling.html) for the scalar acoustic equation, forcing and absorbing layers; [Stanford SEP Ricker discussion](https://sepwww.stanford.edu/data/media/public/docs/sep147/jon1/paper_html/node4.html).
 
-## Upcoming checkpoints
+## Verified checkpoints
 
-2. Velocity models, time-dependent sources, receivers and recordings.
-3. Stencil inspector, sampling diagnostics, boundary comparisons and eight guided experiments.
-4. Accessibility, performance measurements, regression and deployment verification.
+1. `b472fa0` — modular foundation (9 tests).
+2. `d1153c2` — physical models and recordings (15 tests).
+3. `2ede845` — numerical education (19 tests).
+4. Final polish and regression checkpoint (22 tests).
 
 ## Phase 2 — physical models and recordings
 
@@ -61,3 +62,73 @@ they are sampling guidance, not a full heterogeneous error bound.
 Validation: 19 automated numerical/regression tests pass. All eight presets load
 and step in the browser; the inspector reports an exact Float32 match. No browser
 console errors were observed.
+
+
+## Phase 4 — validation, accessibility and performance
+
+Configuration changes build a complete candidate solver, source and recorder before
+replacing the current run. Rejected configurations preserve the previous simulation.
+Receiver coordinates are validated and snap to grid nodes. Individual placement and
+removal have keyboard alternatives. Native form controls, visible focus, reduced-motion
+startup, labeled canvases and status messages supplement the visual experiment.
+Canvas aspect ratio follows physical domain dimensions, including unequal spacing.
+Source and receiver markers can be toggled independently. Velocity-only view hides
+the pressure colorbar. Regular receiver arrays display physical x extents and spacing;
+irregular arrays retain honest index spacing with explicit receiver coordinates.
+
+Wavefield drawing is capped at 30 Hz, recording/UI refresh at 10 Hz. All numerical
+steps still sample receivers exactly once. The source preview and sampling diagnostics
+are cached for the applied setup. Animation stops on pagehide and resumes once on
+back/forward restoration; hidden tabs do no computational work. The default grid
+measured about 0.116 ms per solver step over 1000 steps after warmup in local Node.
+This is an engine benchmark on the development machine, not a mobile/browser FPS
+claim. No worker is needed for this bounded default workload; slower devices may
+reduce playback speed without changing physical dt.
+
+### Verification record
+
+`node --test tests/lab.test.mjs`: **22 passed**. In addition to earlier tests:
+
+- Invalid candidate runs preserve the original wavefield and samples.
+- A 1200 m homogeneous path at 1500 m/s peaks at 0.796 s, within the specified
+  ±0.03 s finite-pulse tolerance around 0.8 s. Identical paths through slow and fast
+  ellipses peak at 1.045 s and 0.682 s, respectively.
+- Every preset evolves finite fields and reproduces identical buffers on replay.
+
+Browser checks: all eight presets load and step; play/pause/reset; three modes;
+layered Ricker forcing; arrays and individual receiver addition/removal; individual
+traces and gathers; exact inspector prediction; unstable time-step rejection;
+unequal spacing; both site themes; desktop and 390 px mobile layout without horizontal
+overflow. No console errors observed. Local integration check resolved 189 page/asset
+links. Shared theme/navigation code and non-Lab page contents are unchanged.
+Reduced-motion startup is implemented using the existing system preference; a real
+assistive-technology audit and a physical mobile-device performance sweep remain
+outside these checks.
+
+### Architecture and extension
+
+- `solver.js`, `boundaries.js`: standalone numerical state and spatial operator.
+- `models.js`, `sources.js`: velocity construction and physical source definitions.
+- `receivers.js`: preallocated sampled data and CSV export.
+- `run.js`: validates and constructs complete replacement runs.
+- `diagnostics.js`, `inspector.js`: sampling analysis and exact pointwise prediction.
+- `renderer.js`, `clock.js`: display and wall-time scheduling, separate from physics.
+- `controls.js`, `lab.js`, `lab.css`: accessible inputs, orchestration and local styles.
+- `experiments.js`: deterministic guided setups and educational copy.
+
+To add an experiment, add a unique ID, title, mode, setup overrides, objective,
+prediction, observation, explanation and challenge to `experiments`. Set `receivers`
+when the standard array is wanted. The dropdown and reset mechanism discover it
+automatically; the preset regression test exercises it. Add focused physical tests
+for any new model, source or numerical operator. Keep defaults explicit in `baseSetup`.
+
+### Deliberate limits
+
+This is a 2-D, constant-density, second-order educational simulator. It omits elasticity,
+variable density, attenuation other than the edge sponge, PML, and inversion. The UI
+uses a fixed 180 × 116 grid, at most 16 sources and 24 receivers, and a 5000-step run
+limit. The damping zone has residual reflections. Ricker forcing is cell-normalized,
+so changing spacing changes integrated source strength. Discontinuous interfaces
+are represented on grid nodes. Dispersion diagnostics are local homogeneous-stencil
+estimates, not heterogeneous error guarantees. No custom model editor, GPU backend
+or unstable-mode demonstration is included; these were optional extensions.
