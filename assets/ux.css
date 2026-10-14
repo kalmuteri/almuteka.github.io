@@ -33,3 +33,17 @@ button,.theme-button,.menu-button,.iconbtn,.mini-control {min-height:44px;}
 }
 @media(max-width:650px) {.example-grid {grid-template-columns:1fr;}}
 @media print {.menu-close,.guide-back,.skip-link {display:none!important;}}
+
+/* Keep the return action in the same header position on every writing page. */
+.guide-back:hover {background:var(--teal-soft);border-color:var(--teal);text-decoration:none;}
+.feature-graphic {min-height:330px;}
+.stack-card.n5 {top:230px;left:35%;background:#b8d5df;}
+@media(max-width:790px) {
+  .article-topbar {flex-wrap:wrap;padding:12px 0;gap:10px;}
+  .article-topbar .topbar-left {flex:1 1 100%;min-width:0;}
+  .article-topbar .topbar-right {width:100%;justify-content:flex-end;}
+  .article-topbar .top-crumb {max-width:none;white-space:normal;overflow-wrap:anywhere;}
+}
+@media(max-width:570px) {
+  .spotlight-head {flex-wrap:wrap;gap:8px;}
+}
