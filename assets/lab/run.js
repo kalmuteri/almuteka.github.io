@@ -1,5 +1,5 @@
 import {Solver} from './solver.js';
-import {Receivers} from './receivers.js';
+import {Receivers} from './receivers.js?v=20261015-ux';
 
 // Construct a complete candidate before the UI replaces its current run.
 export function prepareRun(config, points=[]) {

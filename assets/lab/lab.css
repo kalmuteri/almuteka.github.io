@@ -14,8 +14,8 @@
 .colorbar-labels {display:flex;justify-content:space-between;font-size:.75rem;color:var(--ink-soft);}.lab-help {font-size:.85rem;color:var(--muted);margin:12px 0;}
 .lab-message {color:var(--ink);font-weight:650;}.lab-status output {font-variant-numeric:tabular-nums;}
 @media(max-width:500px){.lab-toolbar button{flex:1 1 auto;}.lab-options label{flex:1 1 120px;}.wave-wrap{grid-template-columns:32px 1fr;}}
-.lab-setup fieldset {border:1px solid var(--line);border-radius:12px;margin:0 0 16px;padding:12px 16px;min-width:0;}
-.lab-setup legend {font-weight:700;color:var(--ink);padding:0 6px;}
+.lab-setup fieldset,.receiver-setup {border:1px solid var(--line);border-radius:12px;margin:0 0 16px;padding:12px 16px;min-width:0;}
+.lab-setup legend,.receiver-setup legend {font-weight:700;color:var(--ink);padding:0 6px;}
 .lab-setup {margin-bottom:24px;}.lab-setup .lab-options {margin:8px 0;}
 #sourceCanvas,#recordCanvas {display:block;width:100%;height:auto;border-radius:8px;background:#0b1f2b;}
 #sourceCanvas {max-width:500px;}.receiver-panel {border-top:1px solid var(--line);margin-top:24px;padding-top:24px;}
@@ -39,3 +39,7 @@
 .axis-z span {white-space:nowrap;}
 @media(max-width:500px){.wave-wrap{grid-template-columns:42px 1fr;}}
 .lab-shell button:disabled {opacity:.5;cursor:default;}
+
+.lab-modes button {display:flex;flex-direction:column;gap:6px;text-align:left;min-width:140px;padding:14px;}
+.lab-modes button span {font-size:.8rem;font-weight:400;line-height:1.4;}
+.lab-shell[data-mode=explore] .learning-only {display:none;}

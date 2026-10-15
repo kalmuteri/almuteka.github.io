@@ -40,9 +40,11 @@ export function drawRecord(canvas,record,channel=-1) {
     for(let n=0;n<record.count;n++){const x=n/(record.count-1)*w,y=h/2-trace[n]/max*h*.45;if(n)ctx.lineTo(x,y);else ctx.moveTo(x,y);}ctx.stroke();
   } else {
     // Horizontal receiver index; vertical recording time, increasing downward.
-    for(let i=0;i<record.traces.length;i++)for(let y=0;y<h;y++) {
+    const columns=Math.min(w,record.traces.length);
+    for(let column=0;column<columns;column++)for(let y=0;y<h;y++) {
+      const i=Math.floor(column*record.traces.length/columns);
       const n=Math.min(record.count-1,Math.floor(y/h*record.count)),rgb=color(record.traces[i][n],max);
-      ctx.fillStyle=`rgb(${rgb.join(',')})`;ctx.fillRect(i*w/record.traces.length,y,Math.ceil(w/record.traces.length),1);
+      ctx.fillStyle=`rgb(${rgb.join(',')})`;ctx.fillRect(column*w/columns,y,Math.ceil(w/columns),1);
     }
   }
   return max;

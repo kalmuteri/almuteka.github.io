@@ -1,14 +1,14 @@
 import {inspect} from './inspector.js';
 import {diagnostics} from './diagnostics.js';
 import {experiments,experimentSetup} from './experiments.js';
-import {prepareRun} from './run.js';
-import {Renderer,drawRecord} from './renderer.js';
+import {prepareRun} from './run.js?v=20261015-ux';
+import {Renderer,drawRecord} from './renderer.js?v=20261015-ux';
 import {Clock} from './clock.js';
-import {Receivers,receiverArray} from './receivers.js';
+import {receiverArray} from './receivers.js?v=20261015-ux';
 import {ricker} from './sources.js';
 import {$,number,readSetup,sourceLabels} from './controls.js';
 let diagnostic,sourcePlotKey='',lastPaint=0,recordPaint=0;
-let config=readSetup(),solver,record,points=[],sourceMarkers=[],playing=!matchMedia('(prefers-reduced-motion: reduce)').matches,last=0,selected=null,activeExperiment='propagation',comparison='';
+let config=readSetup(),solver,record,points=[],sourceMarkers=[],playing=false,last=0,selected=null,activeExperiment='propagation',comparison='';
 const renderer=new Renderer($('waveCanvas')),clock=new Clock();
 function text(id,value){const el=$(id);if(el.textContent!==value)el.textContent=value;}
 function message(value){text('labMessage',value);}
@@ -26,13 +26,20 @@ function reset(nextConfig=config,nextPoints=points){
   $('waveCanvas').style.aspectRatio=((solver.config.nx-1)*solver.config.dx)/((solver.config.nz-1)*solver.config.dz);
   diagnostic=diagnostics(solver,config);sourcePlotKey='';recordPaint=0;
   clock.reset();selected=null;comparison='';
-  $('traceSelect').innerHTML='<option value="-1">Shot gather</option>';
-  points.forEach((_,i)=>{const o=document.createElement('option');o.value=i;o.textContent='Receiver '+(i+1);$('traceSelect').append(o);});
-  $('receiverCoordinates').textContent=points.map((p,i)=>`R${i+1}: x=${p.x*solver.config.dx} m, z=${p.z*solver.config.dz} m`).join(' · ')||'No receivers.';
-  message('Run reset.');draw();
+  const c=solver.config;
+  $('receiverCount').max=c.nx;
+  $('receiverSpacing').min=c.dx;$('receiverSpacing').step=c.dx;
+  $('receiverSpacing').value=Math.max(1,Math.round(Number($('receiverSpacing').value)/c.dx))*c.dx;
+  $('receiverDepth').min=0;$('receiverDepth').max=(c.nz-1)*c.dz;$('receiverDepth').step=c.dz;
+  $('receiverX').min=0;$('receiverX').max=(c.nx-1)*c.dx;
+  $('receiverZ').min=0;$('receiverZ').max=(c.nz-1)*c.dz;
+  $('receiverLimits').textContent=`Up to ${c.nx} receivers per horizontal array; minimum spacing Δx = ${c.dx} m. One receiver per cell, up to ${c.nx*c.nz} across the model. Current recording capacity: ${record.capacity} samples per receiver.`;
+  $('receiverCoordinates').textContent=points.slice(0,180).map((p,i)=>`R${i+1}: x=${p.x*c.dx} m, z=${p.z*c.dz} m`).join(' · ')+(points.length>180?' · More coordinates available in CSV.':'')||'No receivers.';
+  playing=false;
+  message('Ready. Press Play to run, or Step to advance once.');draw();
 }
 function step(){
-  if(record.count>=record.capacity){playing=false;message('Recording limit reached (5000 time steps). Export the data or reset.');return;}
+  if(record.count>=record.capacity){playing=false;message(`Recording limit reached (${record.capacity} samples). Export the data or reset.`);return;}
   solver.step();record.sample(solver.curr);
 }
 function drawSource(){
@@ -43,9 +50,11 @@ function drawSource(){
   $('sourcePlotLabel').textContent=config.sourceType==='ricker'?`Normalized Ricker waveform · time ${config.sourceDelay.toFixed(2)}–${(config.sourceDelay+3/config.frequency).toFixed(2)} s · frequency ${config.frequency} Hz`:`Normalized Gaussian spatial profile · −4σ to +4σ · σ = ${config.sourceWidth} m`;
 }
 function setMode(mode){
+  if(mode==='explore'){$('clickAction').value='source';selected=null;}
+  document.querySelector('.setup-details').open=mode==='experiment';
   $('labShell').dataset.mode=mode;
   document.querySelectorAll('.lab-modes button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));
-  $('modeHelp').textContent={explore:'Explore: choose a guided experiment and watch the physics.',understand:'Understand: inspect cells, follow the discrete equation, and connect wavefields to recordings.',experiment:'Experiment: open Configure model & sources for numerical spacing, time step, and boundary controls.'}[mode];
+  $('modeHelp').textContent={explore:'Explore: model and source controls only. Choose an experiment, then press Play. Switch to Understand to reveal receivers, recordings and the stencil.',understand:'Understand: receiver configuration, shot gathers, sampling diagnostics and the stencil inspector are now visible. Numerical settings stay hidden.',experiment:'Experiment: all learning tools plus editable grid spacing, time step and boundaries. Configure model & sources is open below.'}[mode];
 }
 function showExperiment(){const e=experiments.find(e=>e.id===activeExperiment);$('experimentTitle').textContent=e.title;$('experimentObjective').textContent=e.objective;$('experimentPredict').textContent='Predict: '+e.predict;$('experimentObserve').textContent='Observe: '+e.observe;$('experimentExplain').textContent='Explain: '+e.explain;$('experimentChallenge').textContent='Challenge: '+e.challenge;}
 function loadExperiment(id){
@@ -69,7 +78,7 @@ function renderInspector(){
 }
 function draw(now=0){
   const limit=Number($('fixedLimit').value),view=$('view').value,c=solver.config;
-  const range=renderer.draw(solver,{scale:$('scaleMode').value,limit,grid:$('showGrid').checked,view,sources:$('showSources').checked?sourceMarkers:[],receivers:$('showReceivers').checked?points:[],selected});
+  const range=renderer.draw(solver,{scale:$('scaleMode').value,limit,grid:$('showGrid').checked,view,sources:$('showSources').checked?sourceMarkers:[],receivers:$('labShell').dataset.mode!=='explore'&&$('showReceivers').checked?points:[],selected});
   text('scaleLow',(-range).toPrecision(3));text('scaleHigh',range.toPrecision(3));
   if(now&&now-recordPaint<100)return;recordPaint=now;
   text('simTime',solver.time.toFixed(3)+' s');text('simStatus',playing?'Running':'Paused');text('simToggle',playing?'Pause':'Play');
@@ -80,9 +89,10 @@ function draw(now=0){
   $('xMid').textContent=`x · ${((c.nx-1)*c.dx/2).toFixed(0)} m`;$('xMax').textContent=(c.nx-1)*c.dx+' m';$('zMax').textContent=(c.nz-1)*c.dz+' m';$('zMid').textContent=((c.nz-1)*c.dz/2).toFixed(0)+' m';
   if(selected){const k=selected.z*c.nx+selected.x;$('pointInfo').textContent=`Cell (${selected.x}, ${selected.z}) · x=${selected.x*c.dx} m, z=${selected.z*c.dz} m · v=${solver.velocity[k]} m/s · p=${solver.curr[k].toExponential(3)} a.u.`;}
   else $('pointInfo').textContent='Choose Inspect cell and tap the wavefield to read its velocity and amplitude.';
-  const channel=Number($('traceSelect').value),max=drawRecord($('recordCanvas'),record,channel);
+  const channel=-1,max=$('labShell').dataset.mode==='explore'?0:drawRecord($('recordCanvas'),record);
   $('recordLabel').textContent=points.length?`${record.count} samples/channel · Δt ${(c.dt*1000).toFixed(3)} ms · ${channel<0?'Horizontal: receiver index 1–'+points.length+' (left to right); vertical: time 0–'+solver.time.toFixed(3)+' s (down).':'Horizontal: time 0–'+solver.time.toFixed(3)+' s; vertical: signed amplitude.'} Color/trace range ±${max.toExponential(2)} a.u. (adaptive).`:'No receivers yet. Add an array or select Add receiver and tap the model.';
-  if(channel<0&&points.length>1) $('recordLabel').textContent+=` Receiver x: ${points[0].x*c.dx}–${points.at(-1).x*c.dx} m; coordinates listed below Individual receivers. Positive amplitudes are teal; negative amplitudes are gold.`;
+  if(channel<0&&points.length>1) $('recordLabel').textContent+=` Receiver x: ${points[0].x*c.dx}–${points.at(-1).x*c.dx} m; coordinates listed in Configure model & sources. Positive amplitudes are teal; negative amplitudes are gold.`;
+  if(points.length>$('recordCanvas').width)$('recordLabel').textContent+=' Display samples receiver columns to fit the plot; CSV contains every receiver.';
   const spacing=points.length>1?points[1].x-points[0].x:0;
   const regular=points.length>1&&spacing>0&&points.every((p,i)=>p.x===points[0].x+i*spacing&&p.z===points[0].z);
   $('recordAxis').textContent=channel>=0?`Time (s): 0 → ${solver.time.toFixed(3)}`:regular?`Receiver x (m): ${points[0].x*c.dx} → ${points.at(-1).x*c.dx} · spacing ${spacing*c.dx} m`:'Receiver index (coordinates listed above)';
@@ -99,18 +109,18 @@ $('simStep').onclick=()=>safe(()=>{playing=false;clock.reset();step();draw();});
 $('simReset').onclick=()=>safe(reset);
 $('simPulse').onclick=()=>safe(()=>{if(sourceMarkers.length>=16)throw Error('Reset before adding more than 16 sources.');source(solver,config,solver.time);if(config.sourceType==='gaussian'){for(let i=0;i<record.points.length;i++){const p=record.points[i];record.traces[i][record.count-1]=solver.curr[p.z*solver.config.nx+p.x];}}draw();});
 let validLimit=1;
-for(const id of ['scaleMode','fixedLimit','showGrid','showSources','showReceivers','view','traceSelect'])$(id).addEventListener('change',()=>safe(()=>{if(id==='fixedLimit'){try{validLimit=number('fixedLimit');}catch(e){$('fixedLimit').value=validLimit;throw e;}}draw();}));
+for(const id of ['scaleMode','fixedLimit','showGrid','showSources','showReceivers','view'])$(id).addEventListener('change',()=>safe(()=>{if(id==='fixedLimit'){try{validLimit=number('fixedLimit');}catch(e){$('fixedLimit').value=validLimit;throw e;}}draw();}));
 $('addArray').onclick=()=>safe(()=>{const c=solver.config;reset(config,receiverArray(c,number('receiverCount'),number('receiverSpacing')/c.dx,number('receiverDepth')/c.dz));});
 $('clearReceivers').onclick=()=>safe(()=>{reset(config,[]);});
 $('waveCanvas').addEventListener('click',e=>safe(()=>{
   const r=e.currentTarget.getBoundingClientRect(),c=solver.config,x=Math.max(1,Math.min(c.nx-2,Math.round((e.clientX-r.left)/r.width*(c.nx-1)))),z=Math.max(1,Math.min(c.nz-2,Math.round((e.clientY-r.top)/r.height*(c.nz-1))));
-  if($('clickAction').value==='receiver'){if(points.length>=24)throw Error('Maximum 24 receivers.');reset(config,[...points,{x,z}]);}
+  if($('clickAction').value==='receiver'){reset(config,[...points,{x,z}]);}
   else if($('clickAction').value==='inspect'){playing=false;selected={x,z};comparison='';}
   else{config.sourceX=x*c.dx;config.sourceZ=z*c.dz;$('sourceX').value=config.sourceX;$('sourceZ').value=config.sourceZ;$('simPulse').click();}
   draw();
 }));
-$('addReceiver').onclick=()=>safe(()=>{if(points.length>=24)throw Error('Maximum 24 receivers.');const c=solver.config;reset(config,[...points,{x:number('receiverX')/c.dx,z:number('receiverZ')/c.dz}]);});
-$('removeReceiver').onclick=()=>safe(()=>{const index=Number($('traceSelect').value);if(index<0)throw Error('Select an individual receiver in Recording view first.');reset(config,points.filter((_,i)=>i!==index));});
+$('addReceiver').onclick=()=>safe(()=>{const c=solver.config;reset(config,[...points,{x:number('receiverX')/c.dx,z:number('receiverZ')/c.dz}]);});
+$('removeReceiver').onclick=()=>safe(()=>{const c=solver.config,x=Math.round(number('receiverX')/c.dx),z=Math.round(number('receiverZ')/c.dz);if(!points.some(p=>p.x===x&&p.z===z))throw Error('No receiver at these coordinates.');reset(config,points.filter(p=>p.x!==x||p.z!==z));});
 $('downloadCSV').onclick=()=>{const url=URL.createObjectURL(new Blob([record.csv()],{type:'text/csv'}));const a=document.createElement('a');a.href=url;a.download='acoustic-receivers.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
 document.addEventListener('visibilitychange',()=>{last=0;clock.reset();});
 for(const e of experiments){const option=document.createElement('option');option.value=e.id;option.textContent=e.title;$('experimentSelect').append(option);}
@@ -120,7 +130,7 @@ $('resetExperiment').onclick=()=>safe(()=>loadExperiment(activeExperiment));
 $('autoDt').onchange=()=>{$('dtMs').disabled=$('autoDt').checked;};
 $('inspectCell').onclick=()=>safe(()=>{playing=false;const candidate={x:number('inspectX'),z:number('inspectZ')};inspect(solver,candidate.x,candidate.z);selected=candidate;comparison='';draw();});
 $('predictStep').onclick=()=>safe(()=>{playing=false;if(record.count>=record.capacity)throw Error('Reset before another step.');const candidate=selected||{x:number('inspectX'),z:number('inspectZ')};const before=inspect(solver,candidate.x,candidate.z);selected=candidate;step();const actual=solver.curr[before.k];comparison=`Prediction from t=${before.time.toFixed(6)} s: ${before.predicted.toExponential(8)}; actual stored result: ${actual.toExponential(8)}; absolute difference: ${Math.abs(actual-before.predicted).toExponential(2)}.`;draw();});
-sourceLabels();$('dtMs').disabled=$('autoDt').checked;showExperiment();reset();
+sourceLabels();$('dtMs').disabled=$('autoDt').checked;setMode('explore');showExperiment();reset();
 function frame(now){if(last&&playing&&!document.hidden){safe(()=>{const count=clock.advance((now-last)/1000,Number($('playback').value),solver.config.dt);for(let i=0;i<count&&playing;i++)step();if(now-lastPaint>=1000/30){draw(now);lastPaint=now;}});}last=now;animation=requestAnimationFrame(frame);}
 let animation=requestAnimationFrame(frame);
 addEventListener('pagehide',()=>{cancelAnimationFrame(animation);last=0;clock.reset();});

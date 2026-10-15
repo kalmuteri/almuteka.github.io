@@ -132,3 +132,26 @@ so changing spacing changes integrated source strength. Discontinuous interfaces
 are represented on grid nodes. Dispersion diagnostics are local homogeneous-stencil
 estimates, not heterogeneous error guarantees. No custom model editor, GPU backend
 or unstable-mode demonstration is included; these were optional extensions.
+
+
+## UX revision — October 2026
+
+The current interface starts paused and follows Choose → Configure → Play/observe.
+Mode buttons explain their purpose: Explore hides receivers, recordings and numerical
+analysis; Understand reveals receivers, the shot gather and stencil; Experiment also
+opens configuration and reveals numerical controls. Mode changes preserve the current
+run. Loading a preset or applying configuration resets and pauses it.
+
+Recording view selection was removed: the UI always shows a shot gather. Individual
+receivers are removed by coordinate. Receivers now support one unique sensor per grid
+node (20,880 on the default grid); a horizontal array supports all 180 columns, with
+minimum spacing Δx. Edge nodes are permitted but record the fixed zero-pressure boundary.
+Spacing controls follow the applied grid. Recording buffers hold at most two million
+samples overall and at most 5001 per receiver; larger receiver sets shorten the run,
+with the resulting capacity displayed in configuration. CSV retains all channels;
+gathers wider than the canvas sample columns for display. These limits supersede the
+original 24/32-receiver cap documented in the historical checkpoints above.
+
+23 automated tests pass, including full-width arrays, sub-cell spacing rejection,
+duplicate-cell rejection, and all-node recording allocation. Browser verification
+covers mode visibility, the 180-receiver array, stepping and the removed selector.

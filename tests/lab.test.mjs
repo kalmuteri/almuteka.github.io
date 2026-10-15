@@ -130,3 +130,12 @@ test('all presets run finite and reset reproducibly with their actual source',()
   assert.deepEqual(a.curr,b.curr);assert.ok(Number.isFinite(a.measure()));
  }
 });
+test('receiver limits follow grid cells, spacing and unique occupancy',()=>{
+ const c={nx:180,nz:116,dx:10,dz:10,dt:.002};
+ const row=receiverArray(c,180,1,20);assert.equal(row.length,180);assert.equal(row[0].x,0);assert.equal(row[179].x,179);
+ assert.throws(()=>receiverArray(c,181,1,20),/Invalid/);assert.throws(()=>receiverArray(c,10,.5,20),/Invalid/);
+ assert.throws(()=>new Receivers([{x:1,z:1},{x:1,z:1}],c),/already/);
+ const all=Array.from({length:c.nx*c.nz},(_,k)=>({x:k%c.nx,z:Math.floor(k/c.nx)}));
+ const recording=new Receivers(all,c);assert.equal(recording.points.length,c.nx*c.nz);assert.ok(recording.capacity*all.length<=2000000);
+ recording.sample(new Float32Array(c.nx*c.nz));assert.equal(recording.count,1);
+});
