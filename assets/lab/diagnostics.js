@@ -13,5 +13,5 @@ export function diagnostics(s,source){
  const fmax=source.sourceType==='ricker'?rickerBandwidth(source.frequency):s.vmax*Math.sqrt(2*Math.log(100))/(2*Math.PI*source.sourceWidth);
  const wavelength=s.vmin/fmax,ppw=wavelength/Math.max(c.dx,c.dz);
  const ratios=[0,Math.PI/4,Math.PI/2].map(a=>phaseRatio(s.vmin,fmax,c.dx,c.dz,c.dt,a));
- return {fmax,wavelength,ppw,ratios,phaseError:ratios.some(r=>r===null)?null:100*Math.max(...ratios.map(r=>Math.abs(1-r))),label:s.cfl>.9?'Near limit':'Stable'};
+ return {fmax,wavelength,ppw,ratios,phaseError:ratios.some(r=>r===null)?null:100*Math.max(...ratios.map(r=>Math.abs(1-r))),label:s.cfl>1?'Unstable':s.cfl>.9?'Near limit':'Stable'};
 }

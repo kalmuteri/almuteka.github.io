@@ -37,3 +37,7 @@
 .axis-z {justify-content:space-between;}
 .setup-details>.lab-help {margin-top:0;}
 #labMessage {font-size:.85rem;}
+
+.lab-shell [data-prose] ul {margin:0;padding-left:1.25rem;}
+.lab-shell [data-prose] li+li {margin-top:6px;}
+#stabilityInfo[data-unstable=true] {border-left-color:#d8a651;}

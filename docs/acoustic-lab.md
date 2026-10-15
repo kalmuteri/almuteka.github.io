@@ -196,3 +196,25 @@ numerical regression test, but is no longer loaded or exposed by the interface.
 Validation: 24 tests pass. Browser checks confirm recordings for all three presets,
 the four configuration sections in order, and applying a 16-receiver row through the
 combined form. No browser console errors were observed.
+
+
+## Manual time stepping and maximum time
+
+The user-entered Δt is used unchanged. Automatic stable time stepping was removed.
+CFL above 1 is accepted and labeled Unstable, allowing visible numerical growth.
+The existing amplitude/nonfinite guard stops a divergent run before invalid samples
+are recorded; restarting clears the stopped state. Positive finite input validation
+still applies.
+
+Maximum time defaults to 2 seconds. Runs stop after floor(maximum time / Δt)
+complete steps, with a small floating-point tolerance for exact multiples. The final
+time and step count are displayed; Δt is never shortened for the last step. Recording
+buffers are allocated for all planned samples, including t=0. Configurations beyond
+100001 samples/channel or two million total samples are rejected with guidance to
+reduce duration or receiver count (or increase Δt), rather than stopping unexpectedly
+at the old fixed recording cap.
+
+The receiver plot is visible at t=0, with a ready-state grid and prompt. Multi-sentence
+Lab guidance uses one bullet per sentence. Verification: 26 tests pass. Browser checks
+confirmed stopping at 0.006 s with three 2 ms steps, and accepting CFL 2.121 with an
+unchanged 10 ms step; no browser console errors were observed.

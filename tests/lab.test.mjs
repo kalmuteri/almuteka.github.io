@@ -16,7 +16,7 @@ test('constant field preserved away from Dirichlet edges; buffers rotate, time a
 });
 test('zero field stays zero',()=>{const s=new Solver();for(let n=0;n<20;n++)s.step();assert.equal(s.measure(),0);});
 test('CFL uses vmax and both spacings; invalid inputs rejected',()=>{
- near(cfl(1500,.002,10,20),.3354101966);assert.throws(()=>new Solver({dt:.1}),/Unstable/);assert.throws(()=>new Solver({dx:0}),/positive/);
+ near(cfl(1500,.002,10,20),.3354101966);assert.ok(new Solver({dt:.1}).cfl>1);assert.throws(()=>new Solver({dx:0}),/positive/);
 });
 test('Gaussian startup produces second-order zero-velocity first step',()=>{
  const s=new Solver({boundary:'reflecting'});s.pulse(90,58);const k=58*180+90;
@@ -103,7 +103,7 @@ test('sponge reduces late returning energy relative to reflecting boundaries',()
  for(let n=0;n<450;n++){a.step();b.step();}
  const energy=s=>s.curr.reduce((sum,p)=>sum+p*p,0);assert.ok(energy(b)<energy(a)*.3,`${energy(b)} / ${energy(a)}`);
 });
-import {prepareRun} from '../assets/lab/run.js';
+import {prepareRun,timePlan} from '../assets/lab/run.js';
 test('invalid replacement run leaves the prior solver and recording untouched',()=>{
  const c=experimentSetup('interface'),original=prepareRun(c,[{x:50,z:20}]);original.solver.step();original.record.sample(original.solver.curr);
  const saved=original.solver.curr.slice();
@@ -143,4 +143,20 @@ test('three guided experiments each provide a working default receiver row',()=>
  assert.deepEqual(experiments.map(e=>e.id),['propagation','interface','anomaly']);
  for(const e of experiments){const c=experimentSetup(e.id),points=receiverArray({nx:180,nz:116},c.receiverCount,c.receiverSpacing/c.dx,c.receiverDepth/c.dz),run=prepareRun(c,points);
  assert.equal(run.record.points.length,12);run.solver.step();run.record.sample(run.solver.curr);assert.equal(run.record.count,2);}
+});
+
+test('maximum time uses complete unchanged steps and sizes recordings',()=>{
+ assert.deepEqual(timePlan(.01,.003,12),{steps:3,capacity:4,endTime:.009000000000000001});
+ assert.equal(timePlan(.3,.1,12).steps,3);
+ assert.throws(()=>timePlan(.001,.002),/at least/);
+ assert.throws(()=>timePlan(60,.0001,180),/memory/);
+ const c={...experimentSetup('propagation'),maxTime:.01,dt:.002},r=prepareRun(c,[{x:50,z:20}]);
+ for(let i=0;i<r.plan.steps;i++){r.solver.step();r.record.sample(r.solver.curr);}
+ assert.equal(r.solver.time,.01);assert.equal(r.record.count,6);assert.equal(r.solver.config.dt,.002);
+});
+test('unstable CFL is allowed with unchanged dt and overflow is stopped',()=>{
+ const s=new Solver({dt:.02,nx:30,nz:30,boundary:'reflecting'});s.pulse(15,15,1,2);
+ assert.equal(s.config.dt,.02);assert.ok(s.cfl>1);assert.equal(diagnostics(s,{sourceType:'ricker',frequency:10}).label,'Unstable');
+ assert.throws(()=>{for(let i=0;i<1000;i++)s.step();},/safety limit/);
+ assert.ok(s.curr.every(Number.isFinite));
 });

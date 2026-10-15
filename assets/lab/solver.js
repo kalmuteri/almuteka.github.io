@@ -16,15 +16,12 @@ export class Solver {
     this.n=c.nx*c.nz;this.velocity=makeModel(c);
     this.vmin=Infinity;this.vmax=0;for(const v of this.velocity){if(!Number.isFinite(v)||v<=0)throw Error('Velocity is outside the supported numeric range.');this.vmin=Math.min(this.vmin,v);this.vmax=Math.max(this.vmax,v);}
     this.sources=[];this.force=new Float32Array(this.n);
-    if(c.autoDt)c.dt=.6/(this.vmax*Math.hypot(1/c.dx,1/c.dz));
-    this.validateStability();
     this.prev=new Float32Array(this.n);this.curr=new Float32Array(this.n);this.next=new Float32Array(this.n);
     this.sigma=damping(c.nx,c.nz,c.spongeWidth,c.spongeStrength,c.boundary);
     this.steps=0;this.maxAmplitude=0;
   }
   get time(){return this.steps*this.config.dt;}
   get cfl(){const c=this.config;return cfl(this.vmax,c.dt,c.dx,c.dz);}
-  validateStability(){if(this.cfl>1)throw Error('Unstable time step: CFL must not exceed 1.');}
   reset(){this.prev.fill(0);this.curr.fill(0);this.next.fill(0);this.steps=0;this.maxAmplitude=0;this.sources=[];this.force.fill(0);}
   // A zero-initial-velocity Gaussian, with a second-order Taylor start.
   pulse(x=this.config.nx*.49,z=this.config.nz*.5,amplitude=1,width=4.8) {
@@ -46,7 +43,7 @@ export class Solver {
     for(let z=1;z<nz-1;z++)for(let x=1;x<nx-1;x++) {
       const k=z*nx+x,q=this.sigma[k]*dt;
       const value=(2*this.curr[k]-(1-q)*this.prev[k]+this.velocity[k]**2*dt**2*(laplacian(this.curr,k,nx,dx,dz)+this.force[k]))/(1+q);
-      if(!Number.isFinite(value)||Math.abs(value)>1e12)throw Error('Wavefield exceeded the safety limit. Reset with stable parameters.');
+      if(!Number.isFinite(value)||Math.abs(value)>1e12)throw Error('Wavefield exceeded the safety limit. The unstable run has stopped; restart to repeat or reduce Δt.');
       this.next[k]=value;a=Math.max(a,Math.abs(value));
     }
     const old=this.prev;this.prev=this.curr;this.curr=this.next;this.next=old;

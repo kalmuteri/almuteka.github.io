@@ -33,7 +33,12 @@ export class Renderer {
 }
 export function drawRecord(canvas,record,channel=-1) {
   const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height;ctx.fillStyle='#0b1f2b';ctx.fillRect(0,0,w,h);
-  if(!record||record.count<2||!record.points.length)return 0;
+  if(!record||record.count<2||!record.points.length){
+    ctx.strokeStyle='#29414d';ctx.lineWidth=1;
+    for(let y=0;y<h;y+=h/4){ctx.beginPath();ctx.moveTo(0,y+.5);ctx.lineTo(w,y+.5);ctx.stroke();}
+    ctx.fillStyle='#c7d9df';ctx.font='16px system-ui';ctx.textAlign='center';
+    ctx.fillText('Receivers ready — press Play or Step once',w/2,h/2);ctx.textAlign='start';return 0;
+  }
   let max=1e-12;for(const trace of record.traces)for(let n=0;n<record.count;n++)max=Math.max(max,Math.abs(trace[n]));
   if(channel>=0){
     const trace=record.traces[Math.min(channel,record.traces.length-1)];ctx.strokeStyle='#69c3b9';ctx.lineWidth=1.5;ctx.beginPath();
