@@ -155,3 +155,25 @@ original 24/32-receiver cap documented in the historical checkpoints above.
 23 automated tests pass, including full-width arrays, sub-cell spacing rejection,
 duplicate-cell rejection, and all-node recording allocation. Browser verification
 covers mode visibility, the 180-receiver array, stepping and the removed selector.
+
+
+## Simplicity pass
+
+Experiment selection now loads immediately. Restart run repeats the applied setup;
+Restore experiment defaults (inside Simulation setup) restores the selected preset.
+The main transport contains only Play/Pause, Step once and Restart run. Repeating a
+source remains an advanced action. Plot clicks move the source and restart, rather
+than silently accumulating pulses. The inspector is collapsed until requested.
+
+Form edits pause the run and show an unapplied-changes notice; run and receiver
+mutation controls stay disabled until applying or restarting with saved settings.
+Unused layer, source and sponge fields are hidden and excluded from validation.
+Plot headings follow the selected quantity, amplitude controls disappear in velocity
+view, and depth ticks are aligned at top/middle/bottom. Blank recordings show a
+start instruction instead of an empty plot. Receiver row inputs reflect applied rows,
+and their maximum count follows spacing. Inspector editing pauses playback and no
+longer overwrites typed coordinates during redraw.
+
+Validation: the 23 numerical tests remain green. Browser checks cover automatic
+preset loading, pending/applied settings, velocity labels and colorbars, receiver
+empty states, and exact stencil prediction (zero difference from stored Float32).

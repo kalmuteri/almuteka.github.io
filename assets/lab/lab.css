@@ -43,3 +43,11 @@
 .lab-modes button {display:flex;flex-direction:column;gap:6px;text-align:left;min-width:140px;padding:14px;}
 .lab-modes button span {font-size:.8rem;font-weight:400;line-height:1.4;}
 .lab-shell[data-mode=explore] .learning-only {display:none;}
+
+.axis-heading {font-size:.75rem;color:var(--muted);margin:0 0 6px;}
+.axis-z {justify-content:space-between;}
+.setup-details>.lab-help {margin-top:0;}
+.setup-details>#resetExperiment {margin-bottom:16px;}
+#labMessage {font-size:.85rem;}
+
+.lab-shell:not([data-mode=explore]) .explore-only {display:none;}
