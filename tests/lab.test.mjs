@@ -105,7 +105,7 @@ test('sponge reduces late returning energy relative to reflecting boundaries',()
 });
 import {prepareRun} from '../assets/lab/run.js';
 test('invalid replacement run leaves the prior solver and recording untouched',()=>{
- const c=experimentSetup('recordings'),original=prepareRun(c,[{x:50,z:20}]);original.solver.step();original.record.sample(original.solver.curr);
+ const c=experimentSetup('interface'),original=prepareRun(c,[{x:50,z:20}]);original.solver.step();original.record.sample(original.solver.curr);
  const saved=original.solver.curr.slice();
  assert.throws(()=>prepareRun({...c,sourceX:99999}),/outside/);
  assert.throws(()=>prepareRun(c,[{x:NaN,z:20}]),/inside/);
@@ -138,4 +138,9 @@ test('receiver limits follow grid cells, spacing and unique occupancy',()=>{
  const all=Array.from({length:c.nx*c.nz},(_,k)=>({x:k%c.nx,z:Math.floor(k/c.nx)}));
  const recording=new Receivers(all,c);assert.equal(recording.points.length,c.nx*c.nz);assert.ok(recording.capacity*all.length<=2000000);
  recording.sample(new Float32Array(c.nx*c.nz));assert.equal(recording.count,1);
+});
+test('three guided experiments each provide a working default receiver row',()=>{
+ assert.deepEqual(experiments.map(e=>e.id),['propagation','interface','anomaly']);
+ for(const e of experiments){const c=experimentSetup(e.id),points=receiverArray({nx:180,nz:116},c.receiverCount,c.receiverSpacing/c.dx,c.receiverDepth/c.dz),run=prepareRun(c,points);
+ assert.equal(run.record.points.length,12);run.solver.step();run.record.sample(run.solver.curr);assert.equal(run.record.count,2);}
 });

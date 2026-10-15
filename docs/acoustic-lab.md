@@ -177,3 +177,22 @@ longer overwrites typed coordinates during redraw.
 Validation: the 23 numerical tests remain green. Browser checks cover automatic
 preset loading, pending/applied settings, velocity labels and colorbars, receiver
 empty states, and exact stencil prediction (zero difference from stored Float32).
+
+## Unified interface
+
+The Lab now has one interface, with no Explore/Understand/Experiment classifications
+or numerical-step inspector. The only guided presets are Propagation, Reflection &
+Refraction, and Velocity Anomalies. Each starts with 12 receivers and exposes the
+same recording panel and CSV export.
+
+Configuration contains Physical setup, Source, Receivers, and Numerical settings,
+in that order. Receiver row settings are part of the same pending configuration as
+model and source settings; one Apply changes & restart button validates and applies
+them together. Apply and Restore experiment defaults sit at the bottom. Individual
+receiver placement and coordinate controls were removed. Plot clicks only relocate
+the source and restart. The standalone inspector calculation remains covered by its
+numerical regression test, but is no longer loaded or exposed by the interface.
+
+Validation: 24 tests pass. Browser checks confirm recordings for all three presets,
+the four configuration sections in order, and applying a 16-receiver row through the
+combined form. No browser console errors were observed.
