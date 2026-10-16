@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#102738">
-  <meta name="description" content="Hands-on scientific experiments in wave physics and computation. Explore the interactive acoustic wave simulation.">
+  <meta name="description" content="Interactive experiments in physics and computation. Choose a laboratory, adjust its setup, and explore the results.">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Khalid Almuteri">
   <meta property="og:title" content="Lab · Khalid Almuteri">
-  <meta property="og:description" content="Hands-on scientific experiments in wave physics and computation. Explore the interactive acoustic wave simulation.">
+  <meta property="og:description" content="Interactive experiments in physics and computation. Choose a laboratory, adjust its setup, and explore the results.">
   <link rel="canonical" href="https://kalmuteri.github.io/lab/">
   <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
   <link rel="stylesheet" href="../assets/site.css">
@@ -25,8 +25,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Khalid Almuteri — Geophysics, computation, and ideas in motion">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="../assets/lab/lab.css?v=20261016-time">
-<script type="module" src="../assets/lab/lab.js?v=20261016-time"></script>
+<script>if (location.hash === "#simulation") location.replace("acoustic-wave/" + location.search + location.hash);</script>
 </head>
 <body>
 <a class="skip-link" href="#content">Skip to content</a>
@@ -53,41 +52,12 @@
     <div class="topbar-left"><button class="menu-button" id="menuButton" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false"><span>☰</span></button><span class="top-crumb"><a href="../index.html">KA /</a> LAB</span></div>
     <div class="topbar-right"><a class="top-github" href="https://github.com/kalmuteri" target="_blank" rel="noopener noreferrer">GITHUB ↗</a><button type="button" class="theme-button" id="themeButton" aria-label="Switch color theme" title="Switch color theme"><span aria-hidden="true">◐</span> <span class="theme-text">Theme</span></button></div>
   </header>
-  <main id="content" class="content-wrap"><section class="page-intro"><div class="eyebrow"><span class="eyebrow-line"></span> LAB · INTERACTIVE EXPERIMENTS</div><h1>Turning equations<br>into <em>insight.</em></h1><p class="lead">A space for hands-on scientific experiments. Change a wavefield, explore the behavior, and connect what you see to the underlying method.</p></section>
-<nav class="page-jumps" aria-label="On this page"><a href="#simulation">Try the wave demo ↓</a><a href="../about/#research">About my research →</a></nav>
-<section class="simulation-section" id="simulation" aria-labelledby="lab-title"><div class="section-head"><div><p class="eyebrow small-eyebrow">ACOUSTIC WAVE LAB</p><h2 id="lab-title">Predict. Run. Observe.</h2></div><p>Choose an experiment, configure the model, and compare waves with receiver recordings.</p></div>
-<div class="lab-shell" id="labShell">
-<ul class="lab-help"><li>Choose an experiment.</li><li>Configure if needed.</li><li>Play, pause and observe.</li></ul><section class="experiment-panel" aria-labelledby="experimentTitle"><label>Guided experiment<select id="experimentSelect"></select></label><p class="lab-help">Choosing an experiment loads its setup and clears the current run.</p><h3 id="experimentTitle">Propagation</h3><p id="experimentObjective"></p><p class="prediction" id="experimentPredict"></p><details><summary>Observation guide &amp; explanation</summary><p id="experimentObserve"></p><p id="experimentExplain"></p><p id="experimentChallenge"></p></details></section>
-
-
-<details class="setup-details"><summary>Configuration</summary><form id="setupForm" class="lab-setup"><fieldset><legend>Physical setup</legend><div class="lab-options">
-<label>Velocity model<select id="model"><option value="homogeneous">Homogeneous</option><option value="layers">Two layers</option><option value="slow">Low-velocity anomaly</option><option value="fast">High-velocity anomaly</option><option value="inclined">Inclined interface</option></select></label>
-<label>Background velocity (m/s)<input id="velocity" type="number" min="500" max="4000" step="100" value="1500" required></label>
-<label data-layer>Lower-layer velocity (m/s)<input id="lowerVelocity" type="number" min="500" max="5000" step="100" value="2500" required></label>
-<label data-layer>Interface depth at model center (m)<input id="interfaceDepth" type="number" min="100" max="1050" step="10" value="580" required></label></div></fieldset><fieldset><legend>Source</legend><div class="lab-options"><label>Mechanism<select id="sourceType"><option value="gaussian">Gaussian displacement</option><option value="ricker">Ricker forcing</option></select></label>
-<label>Amplitude <span id="sourceUnits">(a.u.)</span><input id="sourceAmplitude" type="number" min="0.000001" max="10" step="any" value="1" required></label>
-<label>Gaussian width σ (m)<input id="sourceWidth" type="number" min="10" max="200" step="1" value="48" required></label>
-<label>Dominant frequency (Hz)<input id="frequency" type="number" min="1" max="80" step="1" value="12" required></label>
-<label>Activation delay (s)<input id="sourceDelay" type="number" min="0" max="2" step="0.01" value="0" required></label>
-<label>Source x (m)<input id="sourceX" type="number" min="1" step="any" value="890" required></label>
-<label>Source z (m)<input id="sourceZ" type="number" min="1" step="any" value="300" required></label></div>
-<p class="lab-help" id="sourceHelp">Gaussian: an initial displacement with zero initial velocity, not a seismic forcing wavelet.</p><p class="lab-help">Applied source preview</p><canvas id="sourceCanvas" width="500" height="100" aria-label="Source signature preview"></canvas><p id="sourcePlotLabel" class="lab-help"></p></fieldset><fieldset class="receiver-setup"><legend>Receivers</legend><p id="receiverLimits" class="lab-help"></p><p class="lab-help">The receiver row is applied with the rest of the configuration. Boundary cells have fixed zero pressure; use interior cells to record arrivals.</p><div class="lab-options"><label>Receivers in row<input id="receiverCount" type="number" min="1" max="180" value="12" step="1"></label><label>Spacing (m)<input id="receiverSpacing" type="number" min="10" value="100" step="10"></label><label>Depth (m)<input id="receiverDepth" type="number" min="10" max="1140" value="200" step="10"></label></div>
-</fieldset><fieldset><legend>Numerical settings</legend><div class="lab-options"><label>Δx (m)<input id="dx" type="number" min="5" max="25" value="10" step="1" required></label><label>Δz (m)<input id="dz" type="number" min="5" max="25" value="10" step="1" required></label><label>Δt (ms)<input id="dtMs" type="number" min="0.1" max="20" step="any" value="2" required></label><label>Maximum time (s)<input id="maxTime" type="number" min="0.0001" max="60" step="any" value="2" required></label><label>Boundary<select id="boundary"><option value="sponge">Absorbing sponge</option><option value="reflecting">Reflecting: p = 0</option></select></label><label data-sponge>Sponge width (grid nodes)<input id="spongeWidth" type="number" min="3" max="30" step="1" value="15" required></label><label data-sponge>Maximum damping (1/s)<input id="spongeStrength" type="number" min="0" max="200" step="5" value="60" required></label></div><p class="lab-help">Fixed 180 × 116 nodes. Changing spacing changes domain size. Δt is used exactly as entered. CFL above 1 is allowed to demonstrate instability. Runs stop before nonfinite values or amplitudes above 10¹².</p></fieldset><p id="timeLimitInfo" class="lab-help"></p><p id="setupStatus" class="lab-help" role="status"></p><p class="lab-help">Applying changes restarts the wavefield and clears the recordings.</p><div class="lab-toolbar"><button id="applySetup" type="submit">Apply changes &amp; restart</button><button id="resetExperiment" type="button">Restore experiment defaults</button></div></form></details>
-<p class="lab-message" id="labMessage" role="status"></p><div class="lab-status"><strong id="plotTitle">Wave amplitude</strong><span id="simStatus">Paused</span><output id="simTime" aria-live="off" aria-label="Simulation time">0.000 s</output></div>
-<p class="axis-heading">Depth z (m) ↓</p><div class="wave-wrap"><div class="axis-z"><span>0 m</span><span id="zMid"></span><span id="zMax">1150 m</span></div><canvas id="waveCanvas" width="180" height="116" aria-label="Computed wavefield with physical axes. Tap to move the source and restart. Configure receivers using the form above. Form controls provide keyboard alternatives.">A canvas-capable browser is required for the wavefield.</canvas><div class="axis-x"><span>0 m</span><span id="xMid">x · 895 m</span><span id="xMax">1790 m</span></div></div>
-<div class="colorbar" id="amplitudeColorbar"><div class="colorbar-gradient"></div><div class="colorbar-labels"><span id="scaleLow">−1</span><span>0 · amplitude (a.u.)</span><span id="scaleHigh">1</span></div></div>
-<div class="lab-options"><label>Playback speed<select id="playback"><option value="0.25">0.25×</option><option value="0.5" selected>0.5×</option><option value="1">1×</option></select></label></div><div class="lab-toolbar"><button id="simToggle" type="button">Play</button><button id="simStep" type="button">Step once</button><button id="simReset" type="button">Restart run</button></div>
-
-<div class="lab-options"><label>View<select id="view"><option value="wave">Wave amplitude</option><option value="velocity">Velocity model</option><option value="overlay">Amplitude + velocity</option></select></label><label>Amplitude scale<select id="scaleMode"><option value="fixed">Fixed</option><option value="adaptive">Adaptive</option></select></label><label>Fixed limit (a.u.)<input id="fixedLimit" type="number" min="0.001" max="100" step="any" value="1"></label><label class="check"><input type="checkbox" id="showGrid"> Show grid</label><label class="check"><input type="checkbox" id="showSources" checked> Sources</label><label class="check"><input type="checkbox" id="showReceivers" checked> Receivers</label></div>
-<p class="lab-help" id="velocityLegend">Velocity palette: blue (slow) → ochre (fast).</p><p class="lab-help">Tap the plot to move the source and restart.</p><p class="lab-help" id="scaleNote"></p><p class="lab-help" id="samplingInfo"></p><p id="stabilityInfo" class="diagnostic" role="status"></p><p id="dispersionInfo" class="lab-help"></p>
-<section class="receiver-panel" aria-labelledby="receiverTitle"><h3 id="receiverTitle">Receiver recordings</h3><p class="lab-help">Pink squares mark receivers. Manage their positions in Configuration above.</p>
-<div class="lab-toolbar"><button id="downloadCSV" type="button">Download CSV</button></div>
-<canvas id="recordCanvas" width="600" height="240" aria-label="Shot gather: receiver index horizontally and time downward"></canvas><p id="recordAxis" class="lab-help"></p><p id="recordLabel" class="lab-help"></p></section>
-<noscript><p>Enable JavaScript to run the numerical simulation. The <a href="../writing/from-waves-to-computation/">wave-equation explainer</a> is available without JavaScript.</p></noscript>
-</div><p class="sim-note">Educational constant-density acoustic model, with an absorbing sponge rather than a PML. <a href="../writing/from-waves-to-computation/">Read the numerical-method explainer →</a></p></section>
-
-
-<section class="bottom-cta"><div><p class="eyebrow small-eyebrow">READ FURTHER</p><h2>Good engineering begins<br>with good questions.</h2></div><a class="button-primary" href="../writing/">Explore technical essays ↗</a></section></main>
+  <main id="content" class="content-wrap">
+<section class="page-intro"><div class="eyebrow"><span class="eyebrow-line"></span> INTERACTIVE EXPERIMENTS · PHYSICS · COMPUTATION</div><h1>Turning equations<br>into <em>insight.</em></h1><p class="lead">Hands-on experiments in physics and computation. Choose a laboratory, change its setup, and connect what you observe to the underlying method.</p></section>
+<section class="section-block" id="experiments" aria-labelledby="experiments-title"><div class="section-head"><div><p class="eyebrow small-eyebrow">EXPLORE · TEST · OBSERVE</p><h2 id="experiments-title">Interactive laboratories.</h2></div></div>
+<div class="writing-list"><a href="acoustic-wave/" class="writing-row"><span class="writing-bullet">01</span><span><small>WAVE PHYSICS · NUMERICAL METHODS · 3 GUIDED EXPERIMENTS</small><strong>Acoustic Wave Lab</strong><span>Explore propagation, reflection and refraction, and velocity anomalies in a 2-D wavefield. Configure sources and receivers, compare recordings, and test numerical stability.</span></span><b aria-hidden="true">↗</b></a></div></section>
+<section class="paper newsletter-note"><p class="section-kicker">FROM THEORY TO EXPERIMENT</p><p>Each laboratory has its own interactive page. For the ideas behind the simulations, <a href="../writing/">browse the technical essays</a>.</p></section>
+</main>
   <footer class="site-footer"><span>Curiosity. Rigor. Progress.</span><span><a href="../index.html">Home</a><a href="../writing/">Writing</a><a href="https://github.com/kalmuteri" target="_blank" rel="noopener noreferrer">GitHub ↗</a></span></footer>
 </div>
 </body>

@@ -84,7 +84,8 @@ When updating navigation, verify the closed mobile menu is absent from the tab o
 ## Site sections
 
 - **About** includes background, research interests, and working principles.
-- **Lab** (`/lab/`) contains interactive scientific experiments.
+- **Lab** (`/lab/`) lists interactive scientific laboratories, using the same list layout as Writing.
+- **Acoustic Wave Lab** (`/lab/acoustic-wave/`) contains the wave simulation and its three guided experiments. To add another laboratory, create a page under `lab/`, link it from `lab/index.html`, and add its URL to `sitemap.xml`.
 - **Writing** contains technical articles and explainers.
 - **Guides** (`/guides/`) contains the leadership field guide at `/guides/strategy-field-guide/`.
 - The old `/work/` and `/writing/strategy-field-guide/` URLs redirect while preserving bookmarks. `/work/#research` points to About.
