@@ -70,3 +70,6 @@ button,.theme-button,.menu-button,.iconbtn,.mini-control {min-height:44px;}
 @media print {.page-jumps,.article-contents {display:none;}}
 
 #research .work-card h3 {position:relative;font-size:1.7rem;margin:32px 0 12px;}
+
+.content-date {font:400 .8rem/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--muted);margin:12px 0 20px;letter-spacing:0;}
+.feature-band .content-date,.writing-spotlight .content-date {color:inherit;opacity:.8;}
