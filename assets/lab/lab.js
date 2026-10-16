@@ -1,7 +1,7 @@
 import {diagnostics} from './diagnostics.js?v=20261016-time';
 import {experiments,experimentSetup} from './experiments.js?v=20261016-time';
 import {prepareRun} from './run.js?v=20261016-time';
-import {Renderer,drawRecord} from './renderer.js?v=20261016-time';
+import {Renderer,drawRecord,drawTrace} from './renderer.js?v=20261016-traces';
 import {Clock} from './clock.js';
 import {receiverArray} from './receivers.js?v=20261016-time';
 import {ricker} from './sources.js';
@@ -34,6 +34,12 @@ function reset(nextConfig=config){
   const candidate=prepareRun(nextConfig,nextPoints);
   config={...nextConfig};solver=candidate.solver;record=candidate.record;runPlan=candidate.plan;stopped=false;
   points=record.points;sourceMarkers=candidate.markers;
+  const selected=Math.min(Number($('traceReceiver').value)||0,points.length-1);
+  $('traceReceiver').replaceChildren(...points.map((p,i)=>new Option(`R${i+1} · x ${p.x*solver.config.dx} m`,String(i))));
+  $('traceReceiver').value=String(Math.max(0,selected));
+  $('receiverTicks').replaceChildren();
+  const indices=[...new Set([0,Math.floor((points.length-1)/2),points.length-1])];
+  for(const i of indices){const tick=document.createElement('span');tick.textContent=String(points[i].x*solver.config.dx);tick.style.left=`${(i+.5)/points.length*100}%`;$('receiverTicks').append(tick);}
   $('waveCanvas').style.aspectRatio=((solver.config.nx-1)*solver.config.dx)/((solver.config.nz-1)*solver.config.dz);
   diagnostic=diagnostics(solver,config);sourcePlotKey='';recordPaint=0;
   clock.reset();
@@ -84,6 +90,14 @@ function draw(now=0){
   const recordedTime=Math.max(0,record.count-1)*c.dt;
   text('recordTimeMid',(recordedTime/2).toFixed(3));
   text('recordTimeEnd',recordedTime.toFixed(3));
+  text('traceTimeMid',(recordedTime/2).toFixed(3));
+  text('traceTimeEnd',recordedTime.toFixed(3));
+  const selected=Number($('traceReceiver').value)||0;
+  const traceMax=drawTrace($('traceCanvas'),record,selected,$('traceStyle').value);
+  text('traceLow',(-traceMax).toExponential(1));text('traceHigh',traceMax.toExponential(1));
+  const p=points[selected];
+  text('traceDescription',`R${selected+1} · x ${p.x*c.dx} m · z ${p.z*c.dz} m · adaptive scale`);
+  $('traceCanvas').setAttribute('aria-label',`Receiver ${selected+1}, ${$('traceStyle').value} plot; time 0 to ${recordedTime.toFixed(3)} seconds downward; amplitude ±${traceMax.toExponential(2)} a.u.`);
   text('recordScaleLow',max?(-max).toExponential(2):'0');
   text('recordScaleHigh',max?max.toExponential(2):'0');
   $('recordColorbar').hidden=record.count<2;
@@ -103,6 +117,7 @@ function draw(now=0){
   if(solver.cfl>1)$('stabilityInfo').textContent+=' CFL exceeds 1; numerical growth is expected.';
   bulletize();
 }
+for(const id of ['traceReceiver','traceStyle'])$(id).addEventListener('change',()=>draw());
 $('setupForm').addEventListener('submit',e=>{e.preventDefault();safe(()=>{reset(readSetup());});});
 $('sourceType').addEventListener('change',()=>{$('sourceAmplitude').value=$('sourceType').value==='ricker'?'.01':'1';sourceLabels();contextualControls();});
 $('simToggle').onclick=()=>{playing=!playing;clock.reset();message(playing?'Running. Pause to inspect a moment.':'Paused. Play to continue or Step once.');draw();};

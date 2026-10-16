@@ -45,3 +45,18 @@
 .record-wrap {display:grid;grid-template-columns:52px minmax(0,1fr);gap:8px;}
 .record-wrap .axis-z {font-variant-numeric:tabular-nums;}
 .record-scale-caption {font-size:.75rem;color:var(--muted);text-align:center;margin:4px 0 0;}
+
+.recording-panels {display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:24px;}
+.recording-panels>section {min-width:0;}
+.recording-panels #recordCanvas,.recording-panels #traceCanvas {display:block;width:100%;height:360px;border-radius:8px;background:#0b1f2b;}
+.receiver-ticks {grid-column:2;position:relative;height:20px;border-top:1px solid var(--line);font-size:.7rem;color:var(--muted);}
+.receiver-ticks span {position:absolute;transform:translateX(-50%);padding-top:5px;}
+.receiver-ticks span::before {content:'';position:absolute;left:50%;top:0;height:4px;border-left:1px solid var(--muted);}
+.record-x-title {grid-column:2;text-align:center;font-size:.75rem;color:var(--muted);}
+.trace-controls {display:grid;gap:10px;margin:12px 0 18px;}
+.trace-controls select {width:100%;min-width:0;}
+.trace-amplitude-axis {grid-column:2;display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);}
+@media(max-width:1000px){.recording-panels{grid-template-columns:1fr;}.trace-controls{grid-template-columns:1fr 1fr;}.trace-panel .record-wrap{max-width:360px;}}
+
+.record-panel-heading {min-height:210px;}
+@media(max-width:1000px){.record-panel-heading{min-height:0;}}

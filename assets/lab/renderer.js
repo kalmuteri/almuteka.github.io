@@ -54,3 +54,23 @@ export function drawRecord(canvas,record,channel=-1) {
   }
   return max;
 }
+
+// A single seismogram shares the gather's downward time direction.
+export function drawTrace(canvas,record,index=0,style='wiggle') {
+  const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height;
+  ctx.fillStyle='#0b1f2b';ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle='#49616d';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(w/2,0);ctx.lineTo(w/2,h);ctx.stroke();
+  const trace=record?.traces[index];
+  if(!trace||record.count<2){ctx.fillStyle='#c7d9df';ctx.font='14px system-ui';ctx.textAlign='center';ctx.fillText('Awaiting samples',w/2,h/2);return 0;}
+  let max=0;for(let n=0;n<record.count;n++)max=Math.max(max,Math.abs(trace[n]));
+  const scale=max||1;
+  // Positive lobes are filled in wiggle mode; line mode retains both polarities without fill.
+  if(style==='wiggle'){
+    ctx.beginPath();ctx.moveTo(w/2,0);
+    for(let n=0;n<record.count;n++)ctx.lineTo(w/2+Math.max(0,trace[n])/scale*w/2,n/(record.count-1)*(h-1));
+    ctx.lineTo(w/2,h-1);ctx.closePath();ctx.fillStyle='#69c3b955';ctx.fill();
+  }
+  ctx.beginPath();
+  for(let n=0;n<record.count;n++){const x=w/2+trace[n]/scale*(w/2-1),y=n/(record.count-1)*(h-1);if(n)ctx.lineTo(x,y);else ctx.moveTo(x,y);}
+  ctx.strokeStyle='#69c3b9';ctx.lineWidth=1.5;ctx.stroke();return max;
+}
