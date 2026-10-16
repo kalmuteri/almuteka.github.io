@@ -5,7 +5,7 @@ import {Renderer,drawRecord} from './renderer.js?v=20261016-time';
 import {Clock} from './clock.js';
 import {receiverArray} from './receivers.js?v=20261016-time';
 import {ricker} from './sources.js';
-import {$,number,readSetup,sourceLabels,contextualControls} from './controls.js?v=20261016-time';
+import {$,number,readSetup,sourceLabels,contextualControls} from './controls.js?v=20261016-plot-labels';
 let dirty=false,runPlan,stopped=false;
 let diagnostic,sourcePlotKey='',lastPaint=0,recordPaint=0;
 let config=readSetup(),solver,record,points=[],sourceMarkers=[],playing=false,last=0,activeExperiment='propagation';
@@ -55,7 +55,6 @@ function drawSource(){
   if(key===sourcePlotKey)return;sourcePlotKey=key;
   const ctx=$('sourceCanvas').getContext('2d'),w=500,h=100;ctx.fillStyle='#0b1f2b';ctx.fillRect(0,0,w,h);ctx.strokeStyle='#69c3b9';ctx.lineWidth=2;ctx.beginPath();
   for(let i=0;i<w;i++){const q=i/(w-1),value=config.sourceType==='ricker'?ricker(q*3/config.frequency,config.frequency,1.5/config.frequency):Math.exp(-.5*((q-.5)*8)**2);const y=h/2-value*40;if(i)ctx.lineTo(i,y);else ctx.moveTo(i,y);}ctx.stroke();
-  $('sourcePlotLabel').textContent=config.sourceType==='ricker'?`Normalized Ricker waveform · time ${config.sourceDelay.toFixed(2)}–${(config.sourceDelay+3/config.frequency).toFixed(2)} s · frequency ${config.frequency} Hz`:`Normalized Gaussian spatial profile · −4σ to +4σ · σ = ${config.sourceWidth} m`;
 }
 function showExperiment(){const e=experiments.find(e=>e.id===activeExperiment);$('experimentTitle').textContent=e.title;$('experimentObjective').textContent=e.objective;$('experimentPredict').textContent='Predict: '+e.predict;$('experimentObserve').textContent='Observe: '+e.observe;$('experimentExplain').textContent='Explain: '+e.explain;$('experimentChallenge').textContent='Challenge: '+e.challenge;}
 function loadExperiment(id){
@@ -79,23 +78,29 @@ function draw(now=0){
   $('scaleNote').textContent=$('scaleMode').value==='adaptive'?'Adaptive: colors rescale each frame; fading waves can still look strong.':'Fixed: the same color represents the same amplitude throughout the run.';
   $('velocityLegend').textContent=solver.vmin===solver.vmax?`Uniform velocity: ${solver.vmin.toFixed(0)} m/s (blue).`:`Velocity: blue ${solver.vmin.toFixed(0)} → ochre ${solver.vmax.toFixed(0)} m/s.`;
   $('velocityLegend').hidden=view==='wave';$('amplitudeColorbar').hidden=view==='velocity';$('scaleNote').hidden=view==='velocity';
-  $('samplingInfo').textContent=`Grid ${c.nx} × ${c.nz} · Δx ${c.dx} m · Δz ${c.dz} m · Δt ${(c.dt*1000).toFixed(3)} ms · CFL ${solver.cfl.toFixed(3)}. Playback never changes Δt.`;
+  $('samplingInfo').textContent=`Grid ${c.nx} × ${c.nz} · Δx ${c.dx} m · Δz ${c.dz} m · Δt ${(c.dt*1000).toFixed(3)} ms · CFL ${solver.cfl.toFixed(3)}.`;
   $('xMid').textContent=`x · ${((c.nx-1)*c.dx/2).toFixed(0)} m`;$('xMax').textContent=(c.nx-1)*c.dx+' m';$('zMax').textContent=(c.nz-1)*c.dz+' m';$('zMid').textContent=((c.nz-1)*c.dz/2).toFixed(0)+' m';
   const max=drawRecord($('recordCanvas'),record);
+  const recordedTime=Math.max(0,record.count-1)*c.dt;
+  text('recordTimeMid',(recordedTime/2).toFixed(3));
+  text('recordTimeEnd',recordedTime.toFixed(3));
+  text('recordScaleLow',max?(-max).toExponential(2):'0');
+  text('recordScaleHigh',max?max.toExponential(2):'0');
+  $('recordColorbar').hidden=record.count<2;
+  $('recordColorbar').setAttribute('aria-label',`Receiver amplitude: gold ${(-max).toExponential(2)}, zero dark, teal ${max.toExponential(2)} a.u.; adaptive scale`);
   $('recordCanvas').hidden=false;$('recordAxis').hidden=!points.length;
-  $('recordLabel').textContent=points.length?`${points.length} receivers · ${record.count} sample${record.count===1?'':'s'} each · Δt ${(c.dt*1000).toFixed(3)} ms. Time increases downward: 0–${solver.time.toFixed(3)} s. Adaptive amplitude range ±${max.toExponential(2)} a.u.; teal is positive, gold is negative.`:'No receivers yet. Add a row in Configuration to record arrivals.';
+  $('recordLabel').textContent=points.length?`${points.length} receivers · ${record.count} sample${record.count===1?'':'s'} each · Δt ${(c.dt*1000).toFixed(3)} ms.`:'No receivers yet. Add a row in Configuration to record arrivals.';
   if(points.length&&record.count<2)$('recordLabel').textContent='Receivers ready. Press Play or Step once to begin the shot gather.';
   if(points.length>$('recordCanvas').width)$('recordLabel').textContent+=' Plot shows sampled columns; CSV includes every receiver.';
   const spacing=points.length>1?points[1].x-points[0].x:0;
   const regular=points.length>1&&spacing>0&&points.every((p,i)=>p.x===points[0].x+i*spacing&&p.z===points[0].z);
   $('recordAxis').textContent=regular?`Receiver x: ${points[0].x*c.dx}–${points.at(-1).x*c.dx} m · spacing ${spacing*c.dx} m`:`Receiver number: 1–${points.length} (placement order; coordinates in setup)`;
-  text('timeLimitInfo',`Requested maximum: ${config.maxTime} s. Last complete time step: ${runPlan.endTime.toFixed(6)} s (${runPlan.steps} steps). Δt is never shortened to reach the limit.`);
+  text('timeLimitInfo',`Last complete time step: ${runPlan.endTime.toFixed(6)} s (${runPlan.steps} steps).`);
   $('downloadCSV').disabled=!points.length||record.count<2;drawSource();
 
-  text('stabilityInfo',`${diagnostic.label} · CFL ${solver.cfl.toFixed(3)} / 1 · User-defined Δt. ${c.boundary==='sponge'?'Sponge damping; outer p = 0.':'Reflecting outer edge: p = 0 (pressure sign reversal).'}`);
+  text('stabilityInfo',`${diagnostic.label} · CFL ${solver.cfl.toFixed(3)} / 1. ${c.boundary==='sponge'?'Sponge damping; outer p = 0.':'Reflecting outer edge: p = 0 (pressure sign reversal).'}`);
   $('stabilityInfo').dataset.unstable=String(solver.cfl>1);
   if(solver.cfl>1)$('stabilityInfo').textContent+=' CFL exceeds 1; numerical growth is expected.';
-  $('dispersionInfo').textContent=`${config.sourceType==='ricker'?'Ricker 1%-of-peak upper spectral frequency':'Gaussian conservative 1% spatial-spectrum equivalent frequency'}: ${diagnostic.fmax.toFixed(2)} Hz; λmin ${diagnostic.wavelength.toFixed(1)} m; ${diagnostic.ppw.toFixed(1)} points/wavelength. ${diagnostic.ppw<10?'Coarse sampling: inspect dispersion estimates and compare a finer grid.':'Sampling is at least 10 points/wavelength; this is guidance, not a guarantee.'} ${diagnostic.phaseError===null?'No real phase-speed estimate is available for this bandwidth and time step.':'Stencil phase-speed error at this bandwidth: up to '+diagnostic.phaseError.toFixed(1)+'% at vmin over 0°, 45°, 90°.'}`;
   bulletize();
 }
 $('setupForm').addEventListener('submit',e=>{e.preventDefault();safe(()=>{reset(readSetup());});});

@@ -41,3 +41,7 @@
 .lab-shell [data-prose] ul {margin:0;padding-left:1.25rem;}
 .lab-shell [data-prose] li+li {margin-top:6px;}
 #stabilityInfo[data-unstable=true] {border-left-color:#d8a651;}
+
+.record-wrap {display:grid;grid-template-columns:52px minmax(0,1fr);gap:8px;}
+.record-wrap .axis-z {font-variant-numeric:tabular-nums;}
+.record-scale-caption {font-size:.75rem;color:var(--muted);text-align:center;margin:4px 0 0;}
